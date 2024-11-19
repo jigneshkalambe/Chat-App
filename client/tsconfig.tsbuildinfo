@@ -1,0 +1,11 @@
+{
+    "root": [
+        "./src/app.test.tsx",
+        "./src/app.tsx",
+        "./src/index.tsx",
+        "./src/react-app-env.d.ts",
+        "./src/reportwebvitals.ts",
+        "./src/setuptests.ts"
+    ],
+    "version": "5.6.3"
+}

@@ -1,0 +1,10 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    /* background-color: #cfdfef; */
+    /* background-color: rgb(57, 37, 134); */
+    background: linear-gradient(135deg, rgba(57, 37, 134, 1) 0%, rgba(0, 0, 0, 0.8) 100%) !important;
+    padding: 40px 0px;
+}

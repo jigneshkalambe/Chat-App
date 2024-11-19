@@ -1,0 +1,14 @@
+.MainCard {
+    padding: 40px 40px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    border-radius: 10px;
+    max-width: 100%;
+    width: 500px;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    color: white !important;
+}
