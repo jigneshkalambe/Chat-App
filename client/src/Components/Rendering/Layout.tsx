@@ -8,7 +8,7 @@ import "./Layout.css";
 export class Layout extends Controller {
     render() {
         return (
-            <Container>
+            <div className="layoutContainer">
                 <>
                     {this.state.isSignIn === false ? (
                         <SignUp
@@ -30,11 +30,11 @@ export class Layout extends Controller {
                             submitDataHandler={this.submitDataHandler}
                             loginData={this.state.loginData}
                             loginAccount={this.loginAccount}
-                            getLoginData={this.getLoginData }
+                            getLoginData={this.getLoginData}
                         />
                     )}
                 </>
-            </Container>
+            </div>
         );
     }
 }

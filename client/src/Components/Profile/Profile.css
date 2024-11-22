@@ -1,0 +1,110 @@
+.outerLayout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.outerLayout form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    gap: 20px;
+}
+
+.MainProfile {
+    background-color: white;
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 25px;
+    border-radius: 20px;
+}
+
+.profilePhotoLine {
+    height: auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+
+    padding: 20px;
+}
+
+.profilePhotoLine > div {
+    width: auto;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.profilePhotoLine p {
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.personalInfo {
+    padding: 20px 0px;
+    height: auto;
+    width: 100%;
+    border-bottom: 1px solid #ccc;
+}
+
+.personalInfo p {
+    font-size: 25px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.inputFlex {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.inputBox {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.inputBox label {
+    color: rgb(107 114 128);
+    font-weight: 700;
+}
+
+.BioSection {
+    padding: 20px 0px;
+}
+
+.BioSection p {
+    font-size: 25px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.BioSection textarea {
+    width: 100%;
+    height: 80px;
+}
+
+.MainProfile input {
+    height: 45px;
+    padding-left: 10px;
+}
+
+.MainProfile textarea {
+    padding: 20px 0px 0px 20px;
+}
+
+.ButtonLine {
+    display: flex;
+    justify-content: flex-end;
+}

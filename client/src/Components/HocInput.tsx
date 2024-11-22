@@ -330,7 +330,7 @@ export class HocInput extends Component<typesOfInput, ControllerStates> {
         };
 
         return (
-            <div style={type === "checkbox" ? { marginBottom: "0px", display: "flex", justifyContent: "center", alignItems: "center" } : { marginBottom: "10px" }}>
+            <div style={type === "checkbox" ? { marginBottom: "0px ", display: "flex", justifyContent: "center", alignItems: "center" } : { marginBottom: "10px" }}>
                 {/* Optional Label */}
                 {labelText && (
                     <Typography variant="body1" component="span" style={type === "checkbox" ? checkMargin : labelMargin}>

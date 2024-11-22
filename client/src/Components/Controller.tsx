@@ -192,8 +192,13 @@ export class Controller extends Component<{}, ChatStates> {
                     theme: "light",
                     transition: Slide,
                 });
-
                 this.currentAccount();
+
+                if (res.status === 200 || 201) {
+                    setTimeout(() => {
+                        window.location.href = "/home";
+                    }, 2000);
+                }
             })
             .catch((err) => {
                 console.log(err);

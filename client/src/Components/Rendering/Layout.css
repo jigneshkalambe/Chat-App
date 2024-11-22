@@ -1,20 +1,8 @@
-body {
+.layoutContainer {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    /* background-color: #cfdfef; */
-    /* background-color: #d3c6d8; */
     background-color: #be91ca;
-    /* background-color: rgb(57, 37, 134); */
-    /* background: linear-gradient(135deg, rgba(57, 37, 134, 1) 0%, rgba(0, 0, 0, 0.8) 100%) !important; */
-    /* background-image: url(https://img.freepik.com/free-vector/bright-gradient-background-colorful_361591-3795.jpg?t=st=1732018277~exp=1732021877~hmac=0dc3b9aea2e5e0a0d17ac5641f91ce99ad43f12c34e48464dc23720a5f244d46&w=1380); */
-    /* background-image: url(https://img.freepik.com/free-vector/watercolor-oil-painting-background_23-2150148370.jpg?t=st=1732020819~exp=1732024419~hmac=f66ce6a9b63e1c20e65eabbf3412ad01d3689686faadcc6e79c5713ca9ddd6e3&w=996);
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover; */
-
-    /* background: linear-gradient(135deg, rgba(57, 37, 134, 0.8) 0%, rgba(134, 37, 93, 0.8) 50%, rgba(255, 0, 0, 0.8) 100%); */
-    /* background: linear-gradient(135deg, rgba(255, 69, 69, 0.8) 0%, rgba(245, 123, 158, 0.8) 35%, rgba(57, 37, 134, 0.8) 70%, rgba(0, 0, 0, 0.9) 100%); */
     padding: 20px 0px;
 }

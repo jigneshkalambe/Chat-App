@@ -1,0 +1,108 @@
+.SideBar {
+    width: 80px;
+    height: 100vh;
+    transition: width 0.5s linear, box-shadow 0.4s ease-in-out;
+    padding: 10px !important;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0px 8px rgba(0, 0, 0, 0.15);
+    box-sizing: border-box;
+}
+
+.Sidebar_header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 50px;
+    padding: 10px 14px !important;
+    box-sizing: border-box;
+    overflow: hidden;
+    border-bottom: 1px solid #ccc;
+}
+
+.Sidebar_Body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.Sidebar_Body > div {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    margin-top: 30px;
+}
+
+.Sidebar_section {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 50px;
+    padding: 10px 14px !important;
+    box-sizing: border-box;
+    overflow: hidden;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.header_icon {
+    width: 100%;
+    height: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.header_icon svg {
+    width: 25px;
+    height: 25px;
+    display: block;
+}
+
+.header_text {
+    display: none;
+}
+
+.SideBar:hover {
+    width: 255px;
+    box-shadow: 4px 0px 16px rgba(0, 0, 0, 0.25);
+}
+
+.SideBar:hover .Sidebar_header,
+.SideBar:hover .Sidebar_section {
+    width: 200px;
+}
+
+.SideBar:hover .header_text {
+    display: flex;
+    width: 100%;
+    margin-left: 40px;
+}
+
+.SideBar:hover .header_icon {
+    width: 30px;
+}
+
+.Sidebar_section:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.SideBar:hover .Sidebar_section {
+    cursor: pointer;
+}
+
+button.Sidebar_section {
+    border: none;
+    background-color: #eb2d3a !important;
+    color: white !important;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button.Sidebar_section:hover {
+    background-color: red !important;
+}
