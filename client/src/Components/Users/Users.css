@@ -1,0 +1,8 @@
+.Users {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    background-color: white;
+    gap: 20px;
+    cursor: pointer;
+}

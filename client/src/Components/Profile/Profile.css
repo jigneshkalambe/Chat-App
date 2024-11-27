@@ -4,6 +4,7 @@
     align-items: center;
     width: 100%;
     height: 100%;
+    overflow: auto;
 }
 
 .outerLayout form {
@@ -12,6 +13,7 @@
     align-items: center;
     width: 100%;
     height: 100%;
+    overflow: auto;
     gap: 20px;
 }
 
@@ -23,6 +25,30 @@
     height: 100%;
     padding: 25px;
     border-radius: 20px;
+    overflow: auto;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #fff;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+    border: 3px solid #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
 }
 
 .profilePhotoLine {
@@ -32,7 +58,6 @@
     justify-content: center;
     align-items: center;
     border-bottom: 1px solid #ccc;
-
     padding: 20px;
 }
 
@@ -107,4 +132,5 @@
 .ButtonLine {
     display: flex;
     justify-content: flex-end;
+    gap: 15px;
 }

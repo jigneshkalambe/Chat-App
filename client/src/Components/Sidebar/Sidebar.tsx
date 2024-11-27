@@ -4,7 +4,7 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import ExitToAppOutlinedIcon from "@mui/icons-material/ExitToAppOutlined";
 import "./Sidebar.css";
-import { Button, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 
 interface sidebarProps {
     componentRender: (val: string) => void;
@@ -47,7 +47,13 @@ export class Sidebar extends Component<sidebarProps, {}> {
                         </div>
                     </div>
                     <div>
-                        <button className="Sidebar_section">
+                        <button
+                            className="Sidebar_section"
+                            onClick={() => {
+                                localStorage.removeItem("userId");
+                                window.location.href = "/";
+                            }}
+                        >
                             <div className="header_icon">
                                 <ExitToAppOutlinedIcon />
                             </div>

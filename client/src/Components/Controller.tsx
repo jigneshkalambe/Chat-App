@@ -89,12 +89,9 @@ export class Controller extends Component<{}, ChatStates> {
 
     getData = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        this.setState(
-            {
-                formData: { ...this.state.formData, [name]: value },
-            }
-            // () => console.log("FormData", this.state.formData)
-        );
+        this.setState({
+            formData: { ...this.state.formData, [name]: value },
+        });
     };
 
     handleUploadClick = () => {
@@ -145,6 +142,11 @@ export class Controller extends Component<{}, ChatStates> {
                     theme: "light",
                     transition: Slide,
                 });
+                if (res.status === 200 || 201) {
+                    setTimeout(() => {
+                        window.location.href = "/home";
+                    }, 2000);
+                }
             })
             .catch((err) => {
                 console.log(err.response);
@@ -163,19 +165,17 @@ export class Controller extends Component<{}, ChatStates> {
 
     getLoginData = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        this.setState(
-            {
-                loginData: {
-                    ...this.state.loginData,
-                    [name]: value,
-                },
-            }
-            // () => console.log(this.state.loginData)
-        );
+        this.setState({
+            loginData: {
+                ...this.state.loginData,
+                [name]: value,
+            },
+        });
     };
 
     loginAccount = async (e: React.FormEvent) => {
         e.preventDefault();
+
         const { loginData } = this.state;
         await axios
             .post(`${process.env.REACT_APP_API_URL}/account/loginAccount`, loginData)

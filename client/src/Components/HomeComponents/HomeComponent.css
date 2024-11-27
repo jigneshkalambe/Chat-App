@@ -1,5 +1,7 @@
 .HomeComponent {
     width: 100%;
     padding: 20px;
-    background-color: #f8f8ff;
+    background-color: #efeff0;
+    height: 100vh;
+    overflow: hidden;
 }

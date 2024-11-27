@@ -12,6 +12,7 @@ interface formDataTypes {
     number: string;
     location: string;
     bio: string;
+    subtitle: string;
 }
 
 interface profileProps {
@@ -21,6 +22,10 @@ interface profileProps {
     handleUploadClick: () => void;
     handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
     formData: formDataTypes;
+    getUpdateData: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    btnText: string;
+    UpdateAccountHandler: (e: React.FormEvent) => void;
+    photoLink: string;
 }
 
 export class Profile extends Component<profileProps> {
@@ -37,14 +42,14 @@ export class Profile extends Component<profileProps> {
         };
         return (
             <div className="outerLayout">
-                <form>
+                <form onSubmit={this.props.UpdateAccountHandler}>
                     <Typography variant="h3">User Profile</Typography>
                     <div className="MainProfile">
                         <div className="profilePhotoLine">
                             <div>
                                 <input id="fileInput" name="fileInput" type="file" accept="image/*" style={{ display: "none" }} onChange={this.props.handleFileChange} />
                                 <Button sx={{ borderRadius: "100%", pointerEvents: this.props.isEdit === false ? "none" : "auto" }} onClick={this.props.handleUploadClick}>
-                                    <Avatar sx={{ width: 100, height: 100 }} src={currentData?.photoName} />
+                                    <Avatar sx={{ width: 100, height: 100 }} src={this.props.photoLink} />
                                 </Button>
                                 {this.props.isEdit === false ? (
                                     <Typography variant="subtitle1" component={"p"}>
@@ -53,11 +58,39 @@ export class Profile extends Component<profileProps> {
                                 ) : (
                                     ""
                                 )}
+                                {this.props.isEdit === false ? (
+                                    <Typography variant="subtitle1" component={"span"}>
+                                        {currentData?.subtitle}
+                                    </Typography>
+                                ) : (
+                                    ""
+                                )}
 
                                 <Stack gap={1}>
-                                    <input value={this.props.formData.firstName} style={this.props.isEdit === false ? none : display} type="text" className="form-control"></input>
-                                    <input value={this.props.formData.lastName} style={this.props.isEdit === false ? none : display} type="text" className="form-control"></input>
-                                    <input style={this.props.isEdit === false ? none : display} type="text" className="form-control"></input>
+                                    <input
+                                        onChange={this.props.getUpdateData}
+                                        value={this.props.formData.firstName}
+                                        name="firstName"
+                                        style={this.props.isEdit === false ? none : display}
+                                        type="text"
+                                        className="form-control"
+                                    ></input>
+                                    <input
+                                        onChange={this.props.getUpdateData}
+                                        value={this.props.formData.lastName}
+                                        name="lastName"
+                                        style={this.props.isEdit === false ? none : display}
+                                        type="text"
+                                        className="form-control"
+                                    ></input>
+                                    <input
+                                        onChange={this.props.getUpdateData}
+                                        value={this.props.formData.subtitle}
+                                        name="subtitle"
+                                        style={this.props.isEdit === false ? none : display}
+                                        type="text"
+                                        className="form-control"
+                                    ></input>
                                 </Stack>
                             </div>
                         </div>
@@ -77,7 +110,14 @@ export class Profile extends Component<profileProps> {
                                             ) : (
                                                 ""
                                             )}
-                                            <input value={this.props.formData.email} style={this.props.isEdit === false ? none : display} type="email" className="form-control"></input>
+                                            <input
+                                                onChange={this.props.getUpdateData}
+                                                value={this.props.formData.email}
+                                                name="email"
+                                                style={this.props.isEdit === false ? none : display}
+                                                type="email"
+                                                className="form-control"
+                                            ></input>
                                         </div>
                                         <div className="inputBox">
                                             <label>Age</label>
@@ -88,7 +128,14 @@ export class Profile extends Component<profileProps> {
                                             ) : (
                                                 ""
                                             )}
-                                            <input value={this.props.formData.age} style={this.props.isEdit === false ? none : display} type="number" className="form-control"></input>
+                                            <input
+                                                onChange={this.props.getUpdateData}
+                                                value={this.props.formData.age}
+                                                name="age"
+                                                style={this.props.isEdit === false ? none : display}
+                                                type="number"
+                                                className="form-control"
+                                            ></input>
                                         </div>
                                         <div className="inputBox">
                                             <label>Location</label>
@@ -99,7 +146,14 @@ export class Profile extends Component<profileProps> {
                                             ) : (
                                                 ""
                                             )}
-                                            <input value={this.props.formData.location} style={this.props.isEdit === false ? none : display} type="text" className="form-control"></input>
+                                            <input
+                                                onChange={this.props.getUpdateData}
+                                                value={this.props.formData.location}
+                                                name="location"
+                                                style={this.props.isEdit === false ? none : display}
+                                                type="text"
+                                                className="form-control"
+                                            ></input>
                                         </div>
                                     </div>
                                 </div>
@@ -114,7 +168,14 @@ export class Profile extends Component<profileProps> {
                                             ) : (
                                                 ""
                                             )}
-                                            <input value={this.props.formData.number} style={this.props.isEdit === false ? none : display} type="text" className="form-control"></input>
+                                            <input
+                                                onChange={this.props.getUpdateData}
+                                                value={this.props.formData.number}
+                                                name="number"
+                                                style={this.props.isEdit === false ? none : display}
+                                                type="text"
+                                                className="form-control"
+                                            ></input>
                                         </div>
                                         <div className="inputBox">
                                             <label>Gender</label>
@@ -125,7 +186,14 @@ export class Profile extends Component<profileProps> {
                                             ) : (
                                                 ""
                                             )}
-                                            <input value={this.props.formData.gender} style={this.props.isEdit === false ? none : display} type="text" className="form-control"></input>
+                                            <input
+                                                onChange={this.props.getUpdateData}
+                                                value={this.props.formData.gender}
+                                                name="gender"
+                                                style={this.props.isEdit === false ? none : display}
+                                                type="text"
+                                                className="form-control"
+                                            ></input>
                                         </div>
                                     </div>
                                 </div>
@@ -142,12 +210,34 @@ export class Profile extends Component<profileProps> {
                             ) : (
                                 ""
                             )}
-                            <textarea value={this.props.formData.bio} style={this.props.isEdit === false ? none : display} className="form-control" />
+                            <textarea onChange={this.props.getUpdateData} value={this.props.formData.bio} name="bio" style={this.props.isEdit === false ? none : display} className="form-control" />
                         </div>
                         <div className="ButtonLine">
-                            <Button variant="contained" sx={{ textTransform: "capitalize", backgroundColor: "black" }} onClick={this.props.editHandler}>
-                                <Typography>Edit Profile</Typography>
-                            </Button>
+                            {this.props.isEdit === false ? (
+                                ""
+                            ) : (
+                                <Button
+                                    variant="outlined"
+                                    sx={{ textTransform: "capitalize", color: "black", borderColor: "black", width: "auto", padding: "8px 20px" }}
+                                    onClick={this.props.editHandler}
+                                >
+                                    <Typography sx={{ fontWeight: "700" }}>Close</Typography>
+                                </Button>
+                            )}
+                            {this.props.isEdit === false ? (
+                                <Button variant="contained" sx={{ textTransform: "capitalize", backgroundColor: "black", width: "auto", padding: "8px 20px" }} onClick={this.props.editHandler}>
+                                    <Typography>Edit Profile</Typography>
+                                </Button>
+                            ) : (
+                                ""
+                            )}
+                            {this.props.isEdit === false ? (
+                                ""
+                            ) : (
+                                <Button type="submit" variant="contained" sx={{ textTransform: "capitalize", backgroundColor: "black", width: "auto", padding: "8px 20px" }}>
+                                    <Typography>{this.props.btnText}</Typography>
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </form>

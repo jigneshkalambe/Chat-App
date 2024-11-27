@@ -42,6 +42,24 @@ const CreateAccountSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
+        location: {
+            type: String,
+            required: false,
+            trim: true,
+            default: "",
+        },
+        subtitle: {
+            type: String,
+            required: false,
+            trim: true,
+            default: "",
+        },
+        bio: {
+            type: String,
+            required: false,
+            trim: true,
+            default: "",
+        },
     },
     {
         timestamps: true,

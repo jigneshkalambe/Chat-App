@@ -1,6 +1,7 @@
 const Accounts = require("../model/CreateAccountModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+
 const CreateAccount = async (req, res) => {
     try {
         const { photoName, firstName, lastName, email, password, gender, age, number } = req.body;
@@ -70,4 +71,47 @@ const LoginAccount = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 };
-module.exports = { CreateAccount, AccountList, LoginAccount };
+
+const UpdateAccount = async (req, res) => {
+    try {
+        const { photoName, firstName, lastName, email, number, age, gender, location, bio, subtitle } = req.body;
+
+        const currentUser = await Accounts.findOne({ email });
+
+        if (!currentUser) {
+            throw new Error("We couldn't find an account with that email");
+        }
+
+        if (photoName) currentUser.photoName = photoName;
+        if (firstName) currentUser.firstName = firstName;
+        if (lastName) currentUser.lastName = lastName;
+        if (email) currentUser.email = email;
+        if (number) currentUser.number = number;
+        if (age) currentUser.age = age;
+        if (gender) currentUser.gender = gender;
+        if (location) currentUser.location = location;
+        if (bio) currentUser.bio = bio;
+        if (subtitle) currentUser.subtitle = subtitle;
+
+        await currentUser.save();
+        res.status(200).json({ message: "Your account has been updated successfully", data: currentUser });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const FindAccount = async (req, res) => {
+    try {
+        const { email, number } = req.body;
+        const user = await Accounts.findOne({ email });
+        if (user.email === email && user.number === number) {
+            res.status(200).json({ message: "Account found", user });
+        } else {
+            res.status(404).json({ message: "Account not found" });
+        }
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { CreateAccount, AccountList, LoginAccount, UpdateAccount, FindAccount };
