@@ -59,6 +59,7 @@ interface homeState {
     userData: userData[];
     onlineState: [];
     messages: { [userId: string]: data[] };
+    selectedUser: userData;
 }
 
 export class Home extends Component<{}, homeState> {
@@ -97,6 +98,19 @@ export class Home extends Component<{}, homeState> {
             userData: [],
             onlineState: [],
             messages: {},
+            selectedUser: {
+                _id: "",
+                photoName: "",
+                firstName: "",
+                lastName: "",
+                email: "",
+                gender: "",
+                age: "",
+                number: "",
+                location: "",
+                bio: "",
+                subtitle: "",
+            },
         };
         this.socket = io("http://localhost:5000");
         this.autoScroll = React.createRef();
@@ -130,6 +144,14 @@ export class Home extends Component<{}, homeState> {
                     ...prevState.messages,
                     [senderId]: [...(prevState.messages[senderId] || []), { room: "", Author: senderId, messages: message, time }],
                 },
+            }));
+        });
+
+        this.socket.on("userUpdated", (updatedUser) => {
+            console.log("User updated:", updatedUser);
+
+            this.setState((prevState) => ({
+                userData: prevState.userData.map((user) => (user.email === updatedUser.email ? updatedUser : user)),
             }));
         });
 
@@ -189,6 +211,7 @@ export class Home extends Component<{}, homeState> {
                         data: {
                             ...this.state.data,
                         },
+                        userData: currentAccount?.newUserLists,
                     });
                 }
             })
@@ -287,25 +310,39 @@ export class Home extends Component<{}, homeState> {
 
     roomHandler = async (value: joinRoomData) => {
         await axios
-            .post(`${process.env.REACT_APP_API_URL}/account/findAccount`, { email: value.username, number: value.room })
+            .post(`${process.env.REACT_APP_API_URL}/account/findAccount`, { currentAccEmail: this.state.formData.email, email: value.username, number: value.room })
             .then((res) => {
                 const apiData = res.data.user;
-
-                this.setState((prevState) => ({
-                    userData: [...prevState.userData, apiData],
-                }));
-                localStorage.setItem("toUserId", res.data.user?._id);
-
-                toast.success(res.data.message, {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    theme: "light",
-                    transition: Slide,
+                const exitsUser = this.state.userData.find((user) => {
+                    return user.email === apiData.email && user.number === apiData.number;
                 });
+                this.currentAccount();
+                if (exitsUser) {
+                    toast.error("User already exists", {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                        transition: Slide,
+                    });
+                    return;
+                } else {
+                    localStorage.setItem("toUserId", res.data.user?._id);
+                    this.currentAccount();
+                    toast.success(res.data.message, {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                        transition: Slide,
+                    });
+                }
             })
             .catch((err) => {
                 console.log(err);
@@ -360,8 +397,66 @@ export class Home extends Component<{}, homeState> {
         });
     };
 
+    deleteNewUserList = async (user: userData) => {
+        await axios
+            .post(`${process.env.REACT_APP_API_URL}/account/newUserList`, { currentAccEmail: this.state.formData.email, userData: user })
+            .then((res) => {
+                console.log(res);
+                if (res.status === 200) {
+                    // this.setState((prevState) => ({
+                    //     userData: prevState.userData.map((user) => (user.email === updatedUser.email ? updatedUser : user)),
+                    // }));
+                    this.currentAccount();
+                    toast.success(res.data.message, {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                        transition: Slide,
+                    });
+                    this.setState({
+                        selectedUser: {
+                            _id: "",
+                            photoName: "",
+                            firstName: "",
+                            lastName: "",
+                            email: "",
+                            gender: "",
+                            age: "",
+                            number: "",
+                            location: "",
+                            bio: "",
+                            subtitle: "",
+                        },
+                    });
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+                toast.error(err.response.data.message, {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                    transition: Slide,
+                });
+            });
+    };
+
+    selectUserHandler = (user: userData) => {
+        this.setState({
+            selectedUser: user,
+        });
+    };
+
     render() {
-        console.log("Messages", this.state.messages);
+        console.log("UserData", this.state.userData);
 
         const { components } = this.state;
         let componentRender: JSX.Element | null = null;
@@ -392,6 +487,9 @@ export class Home extends Component<{}, homeState> {
                     data={this.state.data}
                     gettingMsg={this.gettingMsg}
                     roomHandler={this.roomHandler}
+                    deleteNewUserList={this.deleteNewUserList}
+                    selectedUser={this.state.selectedUser}
+                    selectUserHandler={this.selectUserHandler}
                 />
             );
         }

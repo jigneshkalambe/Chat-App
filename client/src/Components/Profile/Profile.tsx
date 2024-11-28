@@ -48,8 +48,8 @@ export class Profile extends Component<profileProps> {
                         <div className="profilePhotoLine">
                             <div>
                                 <input id="fileInput" name="fileInput" type="file" accept="image/*" style={{ display: "none" }} onChange={this.props.handleFileChange} />
-                                <Button sx={{ borderRadius: "100%", pointerEvents: this.props.isEdit === false ? "none" : "auto" }} onClick={this.props.handleUploadClick}>
-                                    <Avatar sx={{ width: 100, height: 100 }} src={this.props.photoLink} />
+                                <Button sx={{ borderRadius: "100%", pointerEvents: this.props.isEdit === false ? "none" : "auto", width: 100, height: 100 }} onClick={this.props.handleUploadClick}>
+                                    <Avatar sx={{ width: 100, height: 100, border: "1px solid #ccc" }} src={this.props.photoLink} />
                                 </Button>
                                 {this.props.isEdit === false ? (
                                     <Typography variant="subtitle1" component={"p"}>

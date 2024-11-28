@@ -33,6 +33,8 @@ const io = new Server(server, {
     },
 });
 
+app.set("io", io);
+
 // const usersInRooms = [];
 const usersInRooms = {};
 
@@ -74,6 +76,20 @@ io.on("connection", (socket) => {
     //         console.log(`Message was sent to a different room or socket ${socket.id} is not in room ${room}`);
     //     }
     // });
+
+    socket.on("typing", ({ senderId, recipientId }) => {
+        const recipientSocketId = usersInRooms[recipientId];
+        if (recipientSocketId) {
+            io.to(recipientSocketId).emit("userTyping", { senderId });
+        }
+    });
+
+    socket.on("stopTyping", ({ senderId, recipientId }) => {
+        const recipientSocketId = usersInRooms[recipientId];
+        if (recipientSocketId) {
+            io.to(recipientSocketId).emit("userStoppedTyping", { senderId });
+        }
+    });
 
     socket.on("register", (userId) => {
         usersInRooms[userId] = socket.id;

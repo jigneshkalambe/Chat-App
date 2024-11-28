@@ -8,6 +8,8 @@
     flex-direction: column;
     box-shadow: 2px 0px 8px rgba(0, 0, 0, 0.15);
     box-sizing: border-box;
+    position: sticky;
+    top: 0;
 }
 
 .Sidebar_header {

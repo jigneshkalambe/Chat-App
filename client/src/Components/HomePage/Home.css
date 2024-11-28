@@ -4,10 +4,11 @@ body {
 
 .HomePage {
     margin: 0;
-    overflow-x: hidden;
+    /* padding: 0; */
+    /* overflow-x: hidden; */
 }
 
 .HomePage * {
-    margin: 0;
+    /* margin: 0; */
     padding: 0;
 }

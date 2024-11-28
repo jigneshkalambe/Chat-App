@@ -94,6 +94,27 @@ const UpdateAccount = async (req, res) => {
         if (subtitle) currentUser.subtitle = subtitle;
 
         await currentUser.save();
+
+        await Accounts.updateMany(
+            { "newUserLists.email": email }, // Find all accounts where this user exists in newUserLists
+            {
+                $set: {
+                    "newUserLists.$.photoName": photoName,
+                    "newUserLists.$.firstName": firstName,
+                    "newUserLists.$.lastName": lastName,
+                    "newUserLists.$.number": number,
+                    "newUserLists.$.age": age,
+                    "newUserLists.$.gender": gender,
+                    "newUserLists.$.location": location,
+                    "newUserLists.$.bio": bio,
+                    "newUserLists.$.subtitle": subtitle,
+                },
+            }
+        );
+
+        const io = req.app.get("io");
+        io.emit("userUpdated", currentUser);
+
         res.status(200).json({ message: "Your account has been updated successfully", data: currentUser });
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -102,10 +123,25 @@ const UpdateAccount = async (req, res) => {
 
 const FindAccount = async (req, res) => {
     try {
-        const { email, number } = req.body;
+        const { currentAccEmail, email, number } = req.body;
         const user = await Accounts.findOne({ email });
         if (user.email === email && user.number === number) {
-            res.status(200).json({ message: "Account found", user });
+            const currentAccount = await Accounts.findOne({ email: currentAccEmail });
+            if (currentAccount) {
+                const currentAccountNewUser = currentAccount.newUserLists.some((user) => {
+                    return user.email === email && user.number === number;
+                });
+                if (currentAccountNewUser) {
+                    res.status(404).json({ message: "User Already Exits" });
+                    return;
+                } else {
+                    currentAccount.newUserLists.push(user);
+                    await currentAccount.save();
+                    res.status(200).json({ message: "Account found", user });
+                }
+            } else {
+                console.log("Current account not found");
+            }
         } else {
             res.status(404).json({ message: "Account not found" });
         }
@@ -114,4 +150,25 @@ const FindAccount = async (req, res) => {
     }
 };
 
-module.exports = { CreateAccount, AccountList, LoginAccount, UpdateAccount, FindAccount };
+const removeNewUserList = async (req, res) => {
+    try {
+        const { currentAccEmail, userData } = req.body;
+        const currentAccount = await Accounts.findOne({ email: currentAccEmail });
+        if (currentAccount) {
+            const userList = currentAccount.newUserLists.find((user) => user.email === userData.email);
+            if (userList) {
+                currentAccount.newUserLists = currentAccount.newUserLists.filter((user) => user.email !== userData.email);
+                await currentAccount.save();
+                res.status(200).json({ message: "Account deleted successfully", currentAccount });
+            } else {
+                res.status(404).json({ message: "User not found" });
+            }
+        } else {
+            res.status(404).json({ message: "Account not found" });
+        }
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { CreateAccount, AccountList, LoginAccount, UpdateAccount, FindAccount, removeNewUserList };

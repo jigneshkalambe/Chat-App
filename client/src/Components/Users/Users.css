@@ -2,7 +2,77 @@
     padding: 20px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     background-color: white;
     gap: 20px;
     cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    position: relative;
+}
+
+.Users:hover {
+    background-color: rgb(243 244 246);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* transform: translateY(-5px); */
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.avatar-container {
+    transition: transform 0.3s ease;
+}
+
+.Users:hover .avatar-container {
+    transform: scale(1.05);
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.user-name {
+    transition: color 0.3s ease;
+}
+
+.Users:hover .user-name {
+    color: #1976d2;
+}
+
+.user-status {
+    transition: color 0.3s ease;
+}
+
+.user-status.online {
+    color: #44b700;
+}
+
+.user-status.offline {
+    color: #888;
+}
+
+.deleteIcon {
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: scale(0.8);
+}
+
+.delete-icon-button {
+    transition: background-color 0.3s ease;
+}
+
+.Users:hover .deleteIcon {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.active-user {
+    background-color: rgb(243 244 246);
 }
