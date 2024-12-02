@@ -101,7 +101,7 @@ export class Controller extends Component<{}, ChatStates> {
     handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            console.log("File selected:", file);
+            // console.log("File selected:", file);
             const formData = new FormData();
             formData.append("fileInput", file);
 
@@ -110,7 +110,7 @@ export class Controller extends Component<{}, ChatStates> {
                     headers: { "Content-Type": "multipart/form-data" },
                 })
                 .then((res) => {
-                    console.log(res);
+                    // console.log(res);
                     this.setState({
                         formData: { ...this.state.formData, photoName: res.data.filePath },
                         photoLink: res.data.filePath,

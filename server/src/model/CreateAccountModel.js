@@ -1,5 +1,42 @@
 const mongoose = require("mongoose");
 
+const messageSchema = new mongoose.Schema({
+    room: {
+        type: mongoose.Schema.Types.Mixed,
+        required: true,
+    },
+    Author: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    messages: {
+        type: String,
+        required: false,
+        trim: true,
+    },
+    time: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    Image: {
+        type: String,
+        required: false,
+        // trim: true,
+    },
+    audio: {
+        type: String,
+        required: false,
+        // trim: true,
+    },
+    video: {
+        type: String,
+        required: false,
+        // trim: true,
+    },
+});
+
 const newUserListsSchema = new mongoose.Schema({
     photoName: {
         type: String,
@@ -117,6 +154,10 @@ const CreateAccountSchema = new mongoose.Schema(
             default: "",
         },
         newUserLists: [newUserListsSchema],
+        messages: {
+            type: Map,
+            of: [messageSchema],
+        },
     },
     {
         timestamps: true,

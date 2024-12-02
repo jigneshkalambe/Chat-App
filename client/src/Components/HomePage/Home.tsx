@@ -7,6 +7,7 @@ import Chats from "../Chats/Chats";
 import axios from "axios";
 import { Slide, toast, ToastContainer } from "react-toastify";
 import { io, Socket } from "socket.io-client";
+import { supabase } from "../supabaseClient";
 
 interface formDataTypes {
     photoName: string;
@@ -40,11 +41,24 @@ interface data {
     Author: string;
     messages: string;
     time: string;
+    Image?: string;
+    audio?: string;
+    video?: string;
 }
 
 interface joinRoomData {
     username: string;
     room: string;
+}
+
+interface Img {
+    file: any;
+    url: any;
+}
+
+interface LinksForModalTypes {
+    linkTag: string;
+    link: string;
 }
 
 interface homeState {
@@ -60,6 +74,11 @@ interface homeState {
     onlineState: [];
     messages: { [userId: string]: data[] };
     selectedUser: userData;
+    Img: Img;
+    AudioURL: string;
+    VideoURL: string;
+    isAttach: boolean;
+    LinksForModal: LinksForModalTypes;
 }
 
 export class Home extends Component<{}, homeState> {
@@ -89,6 +108,9 @@ export class Home extends Component<{}, homeState> {
                 room: "",
                 Author: "",
                 messages: "",
+                Image: "",
+                audio: "",
+                video: "",
                 time: new Date(Date.now()).toLocaleTimeString(),
             },
             joinRoomData: {
@@ -110,6 +132,17 @@ export class Home extends Component<{}, homeState> {
                 location: "",
                 bio: "",
                 subtitle: "",
+            },
+            Img: {
+                file: null,
+                url: "",
+            },
+            AudioURL: "",
+            VideoURL: "",
+            isAttach: false,
+            LinksForModal: {
+                linkTag: "",
+                link: "",
             },
         };
         this.socket = io("http://localhost:5000");
@@ -133,18 +166,33 @@ export class Home extends Component<{}, homeState> {
         this.socket.on("privateMessage", (data: any) => {
             console.log(`Private message from ${data.senderId}: ${data.message}`);
             console.log("privateMessage:Data", data);
-            const { senderId, message, time } = data;
-            if (message) {
+            const { senderId, message, time, Image, audio, video } = data;
+            if (message || Image || audio || video) {
                 console.log("Got Message From user", message);
                 const notification = new Audio("/sound/chat-notification.mp3");
                 notification.play();
             }
-            this.setState((prevState) => ({
-                messages: {
-                    ...prevState.messages,
-                    [senderId]: [...(prevState.messages[senderId] || []), { room: "", Author: senderId, messages: message, time }],
-                },
-            }));
+            this.setState(
+                (prevState) => ({
+                    messages: {
+                        ...prevState.messages,
+                        [senderId]: [...(prevState.messages[senderId] || []), { room: "", Author: senderId, messages: message, time, Image: Image, audio: audio, video: video }],
+                    },
+                }),
+                async () => {
+                    await axios
+                        .post(`${process.env.REACT_APP_API_URL}/account/msg`, {
+                            currentAccEmail: this.state.formData.email,
+                            messages: this.state.messages,
+                        })
+                        .then((res) => {
+                            console.log(res);
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                        });
+                }
+            );
         });
 
         this.socket.on("userUpdated", (updatedUser) => {
@@ -188,10 +236,10 @@ export class Home extends Component<{}, homeState> {
         await axios
             .get(`${process.env.REACT_APP_API_URL}/account/accountList`)
             .then((res) => {
-                // console.log(res);
                 const userId = localStorage.getItem("userId");
                 const apiAccounts = res.data.accounts;
                 const currentAccount = apiAccounts.find((acc: any) => acc._id === userId);
+                console.log(currentAccount);
                 if (currentAccount) {
                     this.setState({
                         apiData: { currentAccount },
@@ -212,6 +260,7 @@ export class Home extends Component<{}, homeState> {
                             ...this.state.data,
                         },
                         userData: currentAccount?.newUserLists,
+                        messages: currentAccount?.messages || {},
                     });
                 }
             })
@@ -249,6 +298,109 @@ export class Home extends Component<{}, homeState> {
                     });
                 })
                 .catch((err) => console.log(err));
+        }
+    };
+
+    uploadFile = async (file: File, folder: string): Promise<string | null> => {
+        const bucketName = "Attach_files";
+        const fileName = `${folder}/${Date.now()}_${file.name}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage.from(bucketName).upload(fileName, file, {
+            cacheControl: "3600",
+            upsert: false,
+        });
+
+        if (uploadError) {
+            console.error(`Error uploading ${folder} file:`, uploadError.message);
+            return null;
+        }
+
+        const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(fileName);
+
+        if (!publicUrlData || !publicUrlData.publicUrl) {
+            console.error("Error: Unable to fetch public URL.");
+            return null;
+        }
+
+        const publicUrl = publicUrlData.publicUrl;
+        console.log(`${folder} uploaded successfully:`, publicUrl);
+
+        if (publicUrl) {
+            this.setState({
+                isAttach: true,
+            });
+        }
+
+        return publicUrl;
+    };
+
+    sendImageHandler = () => {
+        document.getElementById("fileInput_image")?.click();
+    };
+
+    sendImageChangeHandler = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            // this.setState({
+            //     isAttach: true,
+            // });
+            const publicUrl = await this.uploadFile(file, "Images");
+            if (publicUrl) {
+                this.setState({
+                    Img: {
+                        url: publicUrl,
+                        file: null,
+                    },
+                    LinksForModal: {
+                        linkTag: "image",
+                        link: publicUrl,
+                    },
+                });
+            }
+        } else {
+            console.log("No file selected");
+        }
+    };
+
+    sendVideoHandler = () => {
+        document.getElementById("fileInput_video")?.click();
+    };
+
+    sendVideoChangeHandler = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const publicUrl = await this.uploadFile(file, "Videos");
+            if (publicUrl) {
+                console.log("Video uploaded successfully:", publicUrl);
+                this.setState({
+                    VideoURL: publicUrl,
+                    LinksForModal: {
+                        linkTag: "video",
+                        link: publicUrl,
+                    },
+                });
+            }
+        }
+    };
+
+    sendAudioHandler = () => {
+        document.getElementById("fileInput_audio")?.click();
+    };
+
+    sendAudioChangeHandler = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const publicUrl = await this.uploadFile(file, "Audio");
+            if (publicUrl) {
+                console.log("Audio uploaded successfully:", publicUrl);
+                this.setState({
+                    AudioURL: publicUrl,
+                    LinksForModal: {
+                        linkTag: "audio",
+                        link: publicUrl,
+                    },
+                });
+            }
         }
     };
 
@@ -359,42 +511,65 @@ export class Home extends Component<{}, homeState> {
             });
     };
 
-    gettingMsg = (recipientId: string, value: string) => {
+    gettingMsg = async (recipientId: string, value: string) => {
         // const toUserId = localStorage.getItem("toUserId");
         const senderId = localStorage.getItem("userId");
-        // const message = value.trim();
-
-        // if (message && toUserId && senderId) {
-        //     this.socket.emit("privateMessage", { toUserId, message, senderId });
-
-        //     this.setState({
-        //         data: {
-        //             ...this.state.data,
-        //             messages: value,
-        //         },
-        //     });
-        // }
 
         const newMessage = {
             room: "",
             Author: "me",
             messages: value,
+            Image: this.state.Img.url,
+            audio: this.state.AudioURL,
+            video: this.state.VideoURL,
             time: new Date().toLocaleTimeString(),
         };
 
-        this.setState((prevState) => ({
-            messages: {
-                ...prevState.messages,
-                [recipientId]: [...(prevState.messages[recipientId] || []), newMessage],
-            },
-        }));
+        this.setState(
+            (prevState) => ({
+                messages: {
+                    ...prevState.messages,
+                    [recipientId]: [...(prevState.messages[recipientId] || []), newMessage],
+                },
+            }),
+            async () => {
+                this.socket.emit("privateMessage", {
+                    toUserId: recipientId,
+                    senderId,
+                    message: value,
+                    Image: this.state.Img.url,
+                    audio: this.state.AudioURL,
+                    video: this.state.VideoURL,
+                    time: new Date().toLocaleTimeString(),
+                });
 
-        this.socket.emit("privateMessage", {
-            toUserId: recipientId,
-            senderId,
-            message: value,
-            time: new Date().toLocaleTimeString(),
-        });
+                await axios
+                    .post(`${process.env.REACT_APP_API_URL}/account/msg`, {
+                        currentAccEmail: this.state.formData.email,
+                        messages: this.state.messages,
+                    })
+                    .then((res) => {
+                        console.log(res);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+
+                this.setState({
+                    Img: {
+                        file: null,
+                        url: "",
+                    },
+                    VideoURL: "",
+                    AudioURL: "",
+                    isAttach: false,
+                    LinksForModal: {
+                        link: "",
+                        linkTag: "",
+                    },
+                });
+            }
+        );
     };
 
     deleteNewUserList = async (user: userData) => {
@@ -455,9 +630,25 @@ export class Home extends Component<{}, homeState> {
         });
     };
 
-    render() {
-        console.log("UserData", this.state.userData);
+    closeAttachModal = () => {
+        this.setState({
+            isAttach: false,
+            LinksForModal: {
+                link: "",
+                linkTag: "",
+            },
+            Img: {
+                file: null,
+                url: "",
+            },
+            VideoURL: "",
+            AudioURL: "",
+        });
+    };
 
+    render() {
+        console.log("Messages", this.state.messages);
+        // console.log("LinksForModal", this.state.LinksForModal);
         const { components } = this.state;
         let componentRender: JSX.Element | null = null;
 
@@ -490,6 +681,16 @@ export class Home extends Component<{}, homeState> {
                     deleteNewUserList={this.deleteNewUserList}
                     selectedUser={this.state.selectedUser}
                     selectUserHandler={this.selectUserHandler}
+                    sendImageHandler={this.sendImageHandler}
+                    sendImageChangeHandler={this.sendImageChangeHandler}
+                    sendVideoHandler={this.sendVideoHandler}
+                    sendVideoChangeHandler={this.sendVideoChangeHandler}
+                    sendAudioHandler={this.sendAudioHandler}
+                    sendAudioChangeHandler={this.sendAudioChangeHandler}
+                    Img={this.state.Img}
+                    isAttach={this.state.isAttach}
+                    closeAttachModal={this.closeAttachModal}
+                    LinksForModal={this.state.LinksForModal}
                 />
             );
         }

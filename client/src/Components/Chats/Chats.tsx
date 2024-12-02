@@ -1,12 +1,15 @@
 import React, { Component } from "react";
 import "./Chats.css";
-import { Avatar, Backdrop, Box, Button, Divider, Modal, Stack, Typography } from "@mui/material";
+import { Avatar, Backdrop, Box, Button, Divider, Modal, Stack, Tooltip, Typography } from "@mui/material";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import PersonAddOutlinedIcon from "@mui/icons-material/PersonAddOutlined";
 import Users from "../Users/Users";
 import { useSpring, animated } from "@react-spring/web";
 import ViewProfile from "../ViewProfile/ViewProfile";
-
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
+import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
+import AudioFileIcon from "@mui/icons-material/AudioFile";
 interface joinRoomData {
     username: string;
     room: string;
@@ -17,6 +20,9 @@ interface data {
     Author: string;
     messages: string;
     time: string;
+    Image?: string;
+    audio?: string;
+    video?: string;
 }
 
 interface userData {
@@ -33,8 +39,18 @@ interface userData {
     subtitle: string;
 }
 
+interface Img {
+    file: any;
+    url: any;
+}
+
 interface onlineState {
     online: string;
+}
+
+interface LinksForModalTypes {
+    linkTag: string;
+    link: string;
 }
 interface chatStates {
     chatOpen: boolean;
@@ -46,6 +62,8 @@ interface chatStates {
     activeUserId: string;
     searchedUser: string;
     IsviewModal: boolean;
+    isAttachOpen: boolean;
+    isModal: boolean;
 }
 
 interface chatProps {
@@ -60,6 +78,16 @@ interface chatProps {
     deleteNewUserList: (user: userData) => void;
     selectedUser: userData;
     selectUserHandler: (value: userData) => void;
+    sendImageHandler: () => void;
+    sendVideoHandler: () => void;
+    sendAudioHandler: () => void;
+    sendImageChangeHandler: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    sendVideoChangeHandler: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    sendAudioChangeHandler: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    Img: Img;
+    isAttach: boolean;
+    closeAttachModal: () => void;
+    LinksForModal: LinksForModalTypes;
 }
 
 interface FadeProps {
@@ -95,18 +123,6 @@ const Fade = React.forwardRef<HTMLDivElement, FadeProps>(function Fade(props, re
     );
 });
 
-const style = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 400,
-    bgcolor: "background.paper",
-    border: "2px solid #000",
-    boxShadow: 24,
-    p: 4,
-};
-
 export class Chats extends Component<chatProps, chatStates> {
     typingTimeout: any;
     constructor(props: any) {
@@ -136,6 +152,8 @@ export class Chats extends Component<chatProps, chatStates> {
             activeUserId: "",
             searchedUser: "",
             IsviewModal: false,
+            isAttachOpen: true,
+            isModal: false,
         };
     }
 
@@ -148,11 +166,21 @@ export class Chats extends Component<chatProps, chatStates> {
     chatMsg = (e: React.FormEvent) => {
         e.preventDefault();
         if (this.state.msg.trim()) {
+            console.log(this.state.msg);
             this.props.gettingMsg(this.props.selectedUser._id, this.state.msg);
             this.setState({
                 msg: "",
+                isAttachOpen: true,
             });
         }
+    };
+
+    attachFilesSend = () => {
+        this.props.gettingMsg(this.props.selectedUser._id, this.state.msg);
+        this.setState({
+            msg: "",
+            isAttachOpen: true,
+        });
     };
 
     joinRoom = (e: React.FormEvent) => {
@@ -180,7 +208,6 @@ export class Chats extends Component<chatProps, chatStates> {
     // };
 
     render() {
-        console.log(this.props.selectedUser);
         const style = {
             position: "absolute",
             top: "50%",
@@ -196,6 +223,61 @@ export class Chats extends Component<chatProps, chatStates> {
             gap: 2,
         };
 
+        const isModal_style = {
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "auto",
+            height: "auto",
+            maxHeight: "600px",
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            borderRadius: 5,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+        };
+
+        const attach_modal_style = {
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "100%",
+            maxWidth: "fit-content",
+            height: this.props.LinksForModal.linkTag === "video" || this.props.LinksForModal.linkTag === "audio" ? "auto !important" : "100% !important",
+            maxHeight: "400px",
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            borderRadius: 5,
+            display: "flex",
+            flexDirection: "column",
+            objectFit: "contain",
+            overflow: "hidden",
+        };
+
+        // getAttachModalStyle() {
+        //     const { linkTag } = this.props.LinksForModal;
+        //     return {
+        //         position: "absolute",
+        //         top: "50%",
+        //         left: "50%",
+        //         transform: "translate(-50%, -50%)",
+        //         width: "100%",
+        //         maxWidth: "fit-content",
+        //         height: linkTag === "video" || linkTag === "audio" ? "auto" : "100%",
+        //         maxHeight: "400px",
+        //         bgcolor: "background.paper",
+        //         boxShadow: 24,
+        //         borderRadius: 5,
+        //         display: "flex",
+        //         flexDirection: "column",
+        //         objectFit: "contain",
+        //         overflow: "hidden",
+        //     };
+        // }
+
         const renderMap =
             this.state.searchedUser !== ""
                 ? this.props.userData.filter((data: any) => {
@@ -207,10 +289,9 @@ export class Chats extends Component<chatProps, chatStates> {
                       );
                   })
                 : this.props.userData;
-
         return (
             <div className="chatBox">
-                <div className="col-lg-3">
+                <div className="col-lg-3" style={{ display: "flex", alignItems: "start" }}>
                     <div className="chat_left">
                         <div className="chat_header_box">
                             <input
@@ -323,7 +404,7 @@ export class Chats extends Component<chatProps, chatStates> {
                                             {this.props.selectedUser.firstName + " " + this.props.selectedUser.lastName}
                                         </Typography>
                                         <Typography sx={{ fontSize: "13px" }}>
-                                            {this.props.onlineState.some((id) => (id as unknown) === this.props.selectedUser._id) ? "Online" : this.state.isTyping === true ? "Typing..." : "Offline"}
+                                            {this.props.onlineState.some((id) => (id as unknown) !== this.props.selectedUser._id) ? "offline" : this.state.isTyping === true ? "Typing..." : "online"}
                                             {/* {this.props.messages[this.props.selectedUser._id]?.find((msg) => msg.Author === this.props.selectedUser._id)
                                                     ? this.props.onlineState.some((id) => (id as unknown) === this.props.selectedUser._id)
                                                         ? "Online"
@@ -377,11 +458,18 @@ export class Chats extends Component<chatProps, chatStates> {
                                     <div
                                         key={index}
                                         style={{
-                                            textAlign: msg.Author === this.props.selectedUser._id ? "left" : "right",
+                                            // textAlign: msg.Author === this.props.selectedUser._id ? "left" : "right",
+                                            float: msg.Author === this.props.selectedUser._id ? "left" : "right",
+                                            clear: "both",
                                             margin: "16px 0",
+                                            width: "auto",
+                                            maxWidth: "80%",
+                                            backgroundColor: msg.Author === this.props.selectedUser._id ? "#fff" : "#2196F3",
+                                            padding: "10px",
+                                            borderRadius: "10px",
                                         }}
                                     >
-                                        <div
+                                        {/* <div
                                             style={{
                                                 display: "inline-block",
                                                 padding: "10px",
@@ -390,16 +478,111 @@ export class Chats extends Component<chatProps, chatStates> {
                                                 color: msg.Author === this.props.selectedUser._id ? "black" : "white",
                                                 maxWidth: "80%",
                                             }}
+                                        > */}
+                                        <span
+                                            // style={{
+                                            //     margin: 0,
+                                            //     // whiteSpace: "wrap",
+                                            //     // wordBreak: "break-all",
+                                            //     width: "auto",
+                                            //     // textAlign: msg.Author === this.props.selectedUser._id ? "end" : "start",
+                                            // }}
+                                            style={{
+                                                display: "inline-block",
+                                                // padding: "10px",
+                                                borderRadius: "10px",
+                                                // backgroundColor: msg.Author === this.props.selectedUser._id ? "#fff" : "#2196F3",
+                                                color: msg.Author === this.props.selectedUser._id ? "black" : "white",
+                                                // maxWidth: "80%",
+                                                width: "auto",
+                                                float: msg.Author === this.props.selectedUser._id ? "left" : "right",
+                                                clear: "both",
+                                                wordBreak: "break-word",
+                                            }}
                                         >
-                                            <p style={{ margin: 0, whiteSpace: "wrap" }}>{msg.messages}</p>
-                                            <div ref={this.props.autoDiv}></div>
-                                            <span style={{ fontSize: "11px", color: msg.Author === this.props.selectedUser._id ? "black" : "white" }}>{msg.time}</span>
-                                        </div>
+                                            {msg.messages}
+                                        </span>
+                                        {/* {this.props.Img.url !== "" ? <img src={msg.Image} alt={msg.Image} width={"300px"}></img> : undefined} */}
+                                        <img
+                                            style={{ cursor: "pointer" }}
+                                            src={msg.Image}
+                                            onClick={() => {
+                                                this.setState({
+                                                    isModal: true,
+                                                });
+                                            }}
+                                            width={msg.Image ? "300px" : "0px"}
+                                            alt={""}
+                                        ></img>
+                                        <Modal
+                                            open={this.state.isModal}
+                                            onClose={() => {
+                                                this.setState({
+                                                    isModal: false,
+                                                });
+                                            }}
+                                            aria-labelledby="modal-modal-title"
+                                            aria-describedby="modal-modal-description"
+                                        >
+                                            <Box sx={isModal_style}>
+                                                <img src={msg.Image} width={msg.Image ? "300px" : "0px"} alt={""}></img>
+                                            </Box>
+                                        </Modal>
+                                        {msg.audio ? (
+                                            <audio controls>
+                                                <source src={msg.audio ? msg.audio : undefined} />
+                                            </audio>
+                                        ) : undefined}
+                                        <video width={msg.video ? "300px" : "0px"} height={msg.video ? "auto" : "0px"} controls>
+                                            <source src={msg.video} type="video/mp4" />
+                                        </video>
+                                        <div ref={this.props.autoDiv}></div>
+                                        <span
+                                            style={{
+                                                width: "auto",
+                                                display: "inline-block",
+                                                fontSize: "11px",
+                                                color: msg.Author === this.props.selectedUser._id ? "black" : "white",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            {msg.time}
+                                        </span>
+                                        {/* </div> */}
                                     </div>
                                 ))}
                             </div>
+                            <Modal open={this.props.isAttach} onClose={this.props.closeAttachModal}>
+                                <Box sx={attach_modal_style}>
+                                    <Box style={{ height: "100%", objectFit: "contain", overflow: "hidden" }}>
+                                        {this.props.LinksForModal.linkTag === "image" ? (
+                                            <img style={{ width: "100%", height: "100%", display: "block", objectFit: "cover" }} src={this.props.LinksForModal.link} alt=""></img>
+                                        ) : this.props.LinksForModal.linkTag === "video" ? (
+                                            <video width={"400px"} height={"auto"} controls>
+                                                <source src={this.props.LinksForModal.link} />
+                                            </video>
+                                        ) : this.props.LinksForModal.linkTag === "audio" ? (
+                                            <audio controls>
+                                                <source src={this.props.LinksForModal.link} />
+                                            </audio>
+                                        ) : null}
+                                    </Box>
+                                    <Stack direction={"row"} justifyContent={"flex-end"} alignItems={"center"} style={{ minHeight: "70px", padding: "0px 20px" }} gap={"20px"}>
+                                        <Button
+                                            onClick={this.props.closeAttachModal}
+                                            variant="outlined"
+                                            style={{ width: "100%", color: "black", border: "1px solid black", textTransform: "capitalize" }}
+                                        >
+                                            Close
+                                        </Button>
+                                        <Button onClick={this.attachFilesSend} variant="contained" style={{ width: "100%", textTransform: "capitalize" }}>
+                                            Send
+                                        </Button>
+                                    </Stack>
+                                </Box>
+                            </Modal>
                             <form onSubmit={this.chatMsg}>
-                                <div className="chat_footer ">
+                                <div className="chat_footer">
                                     <input
                                         value={this.state.msg}
                                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -419,6 +602,51 @@ export class Chats extends Component<chatProps, chatStates> {
                                         placeholder="Send Meassages"
                                         type="text"
                                     ></input>
+                                    <input id="fileInput_image" name="fileInput_image" type="file" accept="image/*" style={{ display: "none" }} onChange={this.props.sendImageChangeHandler} />
+                                    <input id="fileInput_video" name="fileInput_video" type="file" accept="video/*" style={{ display: "none" }} onChange={this.props.sendVideoChangeHandler} />
+                                    <input id="fileInput_audio" name="fileInput_audio" type="file" accept="audio/*" style={{ display: "none" }} onChange={this.props.sendAudioChangeHandler} />
+                                    {this.state.isAttachOpen === false ? (
+                                        <div className="attachFile">
+                                            <Tooltip title="Upload a image" placement="top">
+                                                <Button
+                                                    onClick={this.props.sendImageHandler}
+                                                    variant="outlined"
+                                                    sx={{ borderRadius: "100%", width: 45, height: 45, minWidth: 0, color: "#004F98", border: "1px solid #004F98" }}
+                                                >
+                                                    <PhotoLibraryIcon />
+                                                </Button>
+                                            </Tooltip>
+                                            <Tooltip title="Upload a video" placement="top">
+                                                <Button
+                                                    onClick={this.props.sendVideoHandler}
+                                                    variant="outlined"
+                                                    sx={{ borderRadius: "100%", width: 45, height: 45, minWidth: 0, color: "#f82f6b", border: "1px solid #f82f6b" }}
+                                                >
+                                                    <VideoLibraryIcon />
+                                                </Button>
+                                            </Tooltip>
+                                            <Tooltip title="Upload a audio" placement="top">
+                                                <Button
+                                                    onClick={this.props.sendAudioHandler}
+                                                    variant="outlined"
+                                                    sx={{ borderRadius: "100%", width: 45, height: 45, minWidth: 0, color: "orange", border: "1px solid orange" }}
+                                                >
+                                                    <AudioFileIcon />
+                                                </Button>
+                                            </Tooltip>
+                                        </div>
+                                    ) : null}
+                                    <Button
+                                        onClick={() => {
+                                            this.setState({
+                                                isAttachOpen: !this.state.isAttachOpen,
+                                            });
+                                        }}
+                                        variant="contained"
+                                        sx={{ borderRadius: "100%", width: 45, height: 45, minWidth: 0, backgroundColor: "#ccc", color: "black" }}
+                                    >
+                                        <AttachFileIcon />
+                                    </Button>
                                     <Button type="submit" variant="contained" sx={{ borderRadius: "20px", height: "45px", backgroundColor: "#2196F3" }}>
                                         <SendOutlinedIcon />
                                     </Button>

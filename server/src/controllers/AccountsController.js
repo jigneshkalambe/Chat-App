@@ -51,7 +51,6 @@ const LoginAccount = async (req, res) => {
         const { email, password } = req.body;
 
         if (email === "" || password === "") {
-            // return res.status(400).json({ message: "Please fill out all the fields correctly." });
             throw new Error("Please fill out all the fields correctly.");
         }
 
@@ -96,7 +95,7 @@ const UpdateAccount = async (req, res) => {
         await currentUser.save();
 
         await Accounts.updateMany(
-            { "newUserLists.email": email }, // Find all accounts where this user exists in newUserLists
+            { "newUserLists.email": email },
             {
                 $set: {
                     "newUserLists.$.photoName": photoName,
@@ -171,4 +170,21 @@ const removeNewUserList = async (req, res) => {
     }
 };
 
-module.exports = { CreateAccount, AccountList, LoginAccount, UpdateAccount, FindAccount, removeNewUserList };
+const userAccountMsg = async (req, res) => {
+    try {
+        const { currentAccEmail, messages } = req.body;
+        const currentAccount = await Accounts.findOne({ email: currentAccEmail });
+        if (currentAccount) {
+            currentAccount.messages = messages;
+            await currentAccount.save();
+            console.log(messages);
+            res.status(200).json({ message: "Messages updated successfully", currentAccount });
+        } else {
+            console.log("Current Account not found");
+        }
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { CreateAccount, AccountList, LoginAccount, UpdateAccount, FindAccount, removeNewUserList, userAccountMsg };

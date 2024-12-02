@@ -8,5 +8,6 @@ router.post("/loginAccount", AccountController.LoginAccount);
 router.post("/updateAccount", AccountController.UpdateAccount);
 router.post("/findAccount", AccountController.FindAccount);
 router.post("/newUserList", AccountController.removeNewUserList);
+router.post("/msg", AccountController.userAccountMsg);
 
 module.exports = router;

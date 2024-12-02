@@ -1,11 +1,11 @@
 .chatBox {
     background-color: white;
     width: 100%;
-    height: 100%;
     border-radius: 20px;
     overflow: hidden;
     display: flex;
     flex-wrap: wrap;
+    height: calc(100vh - 45px);
     border: 1px solid #ccc;
 }
 
@@ -17,10 +17,10 @@
 
 .chat_header_box input {
     border: 1px solid #ccc;
-    height: 40px;
     width: 100%;
     border-radius: 10px;
     padding: 0px 0px 0px 20px;
+    height: 40px;
 }
 
 .chat_header_box input:focus {
@@ -33,17 +33,19 @@
     height: auto;
     border-top: 1px solid #ccc;
 }
-
-.chat_body,
-.chat_left {
+.chat_body {
     width: 100%;
-    height: 100%;
+    height: calc(100vh - 45px);
     display: flex;
     flex-direction: column;
 }
 
 .chat_left {
     border-right: 1px solid #ccc;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .chat_users {
@@ -54,14 +56,11 @@
     overflow: auto;
 }
 
-/* .chat_users div:hover {
-    background-color: rgb(243 244 246);
-} */
-
 .chat_msg_header {
     background-color: #ffffff;
     width: 100%;
-    height: 81px;
+    max-height: 81px;
+    height: 100%;
     border-radius: 0px 20px 0px 0px;
     display: flex;
     align-items: center;
@@ -79,21 +78,25 @@
 
 .chat_msg_body {
     width: 100%;
-    height: 581px;
+    /* height: 581px; */
+    height: 100%;
     background-color: #e3f2fd;
     display: block;
     padding: 20px;
     overflow: auto;
+    position: relative;
 }
 
 .chat_footer {
-    height: 84px;
+    height: 85.8px;
     background-color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 20px;
     gap: 10px;
+    position: relative;
+    border-top: 1px solid #ccc;
 }
 
 .chat_footer input {
@@ -110,4 +113,19 @@
 
 .deleteIcon {
     display: none;
+}
+
+.attachFile {
+    position: absolute;
+    top: -60px;
+    right: 15px;
+    background-color: white;
+    border-radius: 20px;
+    padding: 10px 20px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: auto;
+    gap: 20px;
+    border: 1px solid #ccc;
 }

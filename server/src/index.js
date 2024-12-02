@@ -97,10 +97,10 @@ io.on("connection", (socket) => {
         io.emit("onlineUsers", Object.keys(usersInRooms));
     });
 
-    socket.on("privateMessage", ({ toUserId, message, senderId, time }) => {
+    socket.on("privateMessage", ({ toUserId, message, senderId, time, Image, audio, video }) => {
         const recipientSocketId = usersInRooms[toUserId];
         if (recipientSocketId) {
-            io.to(recipientSocketId).emit("privateMessage", { toUserId, message, senderId, time });
+            io.to(recipientSocketId).emit("privateMessage", { toUserId, message, senderId, time, Image, audio, video });
         } else {
             console.log(`User ${toUserId} not connected`);
             socket.emit("userNotAvailable", { message: "User is offline", senderId });
