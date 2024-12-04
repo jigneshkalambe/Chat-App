@@ -71,12 +71,11 @@ export class ViewProfile extends Component<viewProfileProps, viewProfileStates> 
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: "500px",
-            height: "500px",
-            bgcolor: "background.paper",
+            width: "100%",
+            height: "100%",
+            maxWidth: "500px",
+            maxHeight: "500px",
             boxShadow: 24,
-            borderRadius: "100%",
-            p: 0,
             display: "flex",
             flexDirection: "column",
             gap: 2,
@@ -121,8 +120,11 @@ export class ViewProfile extends Component<viewProfileProps, viewProfileStates> 
                         }}
                         sx={{ width: "auto" }}
                     >
-                        <Box sx={style}>
-                            <img src={this.props.userData.photoName} style={{ width: "100%", height: "100%", borderRadius: "100%", objectFit: "cover" }} alt={this.props.userData.photoName}></img>
+                        <Box
+                            // sx={style}
+                            className="img_modal"
+                        >
+                            <img src={this.props.userData.photoName} className="viewImage" alt={this.props.userData.photoName}></img>
                         </Box>
                     </Modal>
                     <Typography variant="body1" component="p" sx={{ margin: 0, fontSize: "16px", whiteSpace: "wrap" }}>

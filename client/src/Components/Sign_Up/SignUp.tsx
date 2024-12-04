@@ -47,9 +47,9 @@ export class SignUp extends Component<props> {
                     </Box>
                     <form onSubmit={this.props.submitDataHandler}>
                         <div className="row">
-                            <div className="col-lg-6">
+                            <div className="col-lg-6 col-md-12 col-12">
                                 <Box>
-                                    <Stack spacing={2} direction="row">
+                                    <Stack spacing={2} direction="row" sx={{ justifyContent: "space-between" }}>
                                         <HocInput formData={this.props.formData} getData={this.props.getData} labelText="First Name" placeholder="Enter First Name" type="text" name="firstName" />
                                         <HocInput formData={this.props.formData} getData={this.props.getData} labelText="Last Name" placeholder="Enter Last Name" type="text" name="lastName" />
                                     </Stack>
@@ -69,7 +69,7 @@ export class SignUp extends Component<props> {
                                     />
                                 </Stack>
                             </div>
-                            <div className="col-lg-6">
+                            <div className="col-lg-6 col-md-12 col-12">
                                 <Stack>
                                     <HocInput formData={this.props.formData} getData={this.props.getData} labelText="Gender" placeholder="Enter Your Gender" type="text" name="gender" />
 

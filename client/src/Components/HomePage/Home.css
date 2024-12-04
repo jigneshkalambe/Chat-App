@@ -4,11 +4,16 @@ body {
 
 .HomePage {
     margin: 0;
-    /* padding: 0; */
-    /* overflow-x: hidden; */
+    display: flex;
+    flex-direction: row;
 }
 
 .HomePage * {
-    /* margin: 0; */
     padding: 0;
+}
+
+@media (max-width: 576px) {
+    .HomePage {
+        flex-direction: column-reverse;
+    }
 }

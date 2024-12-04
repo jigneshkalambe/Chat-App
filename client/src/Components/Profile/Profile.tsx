@@ -98,8 +98,8 @@ export class Profile extends Component<profileProps> {
                             <Typography variant="body2" component={"p"}>
                                 Personal Information
                             </Typography>
-                            <div className="d-flex gap-4">
-                                <div className="col-lg-6">
+                            <div className="d-flex flex-sm-row flex-column gap-4">
+                                <div className="col-lg-6 col-md-6 col-sm-6 col-12">
                                     <div className="inputFlex">
                                         <div className="inputBox">
                                             <label>Email</label>
@@ -157,7 +157,7 @@ export class Profile extends Component<profileProps> {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="col-lg-6">
+                                <div className="col-lg-6 col-md-6 col-sm-6 col-12">
                                     <div className="inputFlex">
                                         <div className="inputBox">
                                             <label>Phone Number</label>

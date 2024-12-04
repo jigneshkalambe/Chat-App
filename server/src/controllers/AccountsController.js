@@ -176,7 +176,7 @@ const userAccountMsg = async (req, res) => {
         const currentAccount = await Accounts.findOne({ email: currentAccEmail });
         if (currentAccount) {
             currentAccount.messages = messages;
-            await currentAccount.save();
+            // await currentAccount.save();
             console.log(messages);
             res.status(200).json({ message: "Messages updated successfully", currentAccount });
         } else {

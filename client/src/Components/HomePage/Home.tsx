@@ -37,7 +37,6 @@ interface userData {
 }
 
 interface data {
-    room: string | number;
     Author: string;
     messages: string;
     time: string;
@@ -105,7 +104,6 @@ export class Home extends Component<{}, homeState> {
             btnText: "Save Changes",
             photoLink: "",
             data: {
-                room: "",
                 Author: "",
                 messages: "",
                 Image: "",
@@ -176,7 +174,17 @@ export class Home extends Component<{}, homeState> {
                 (prevState) => ({
                     messages: {
                         ...prevState.messages,
-                        [senderId]: [...(prevState.messages[senderId] || []), { room: "", Author: senderId, messages: message, time, Image: Image, audio: audio, video: video }],
+                        [senderId]: [
+                            ...(prevState.messages[senderId] || []),
+                            {
+                                Author: senderId,
+                                messages: message,
+                                time,
+                                Image: Image,
+                                audio: audio,
+                                video: video,
+                            },
+                        ],
                     },
                 }),
                 async () => {
@@ -239,7 +247,6 @@ export class Home extends Component<{}, homeState> {
                 const userId = localStorage.getItem("userId");
                 const apiAccounts = res.data.accounts;
                 const currentAccount = apiAccounts.find((acc: any) => acc._id === userId);
-                console.log(currentAccount);
                 if (currentAccount) {
                     this.setState({
                         apiData: { currentAccount },
@@ -341,9 +348,6 @@ export class Home extends Component<{}, homeState> {
     sendImageChangeHandler = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            // this.setState({
-            //     isAttach: true,
-            // });
             const publicUrl = await this.uploadFile(file, "Images");
             if (publicUrl) {
                 this.setState({
@@ -512,11 +516,9 @@ export class Home extends Component<{}, homeState> {
     };
 
     gettingMsg = async (recipientId: string, value: string) => {
-        // const toUserId = localStorage.getItem("toUserId");
         const senderId = localStorage.getItem("userId");
 
         const newMessage = {
-            room: "",
             Author: "me",
             messages: value,
             Image: this.state.Img.url,
@@ -578,9 +580,6 @@ export class Home extends Component<{}, homeState> {
             .then((res) => {
                 console.log(res);
                 if (res.status === 200) {
-                    // this.setState((prevState) => ({
-                    //     userData: prevState.userData.map((user) => (user.email === updatedUser.email ? updatedUser : user)),
-                    // }));
                     this.currentAccount();
                     toast.success(res.data.message, {
                         position: "top-right",
@@ -648,7 +647,6 @@ export class Home extends Component<{}, homeState> {
 
     render() {
         console.log("Messages", this.state.messages);
-        // console.log("LinksForModal", this.state.LinksForModal);
         const { components } = this.state;
         let componentRender: JSX.Element | null = null;
 
@@ -697,8 +695,8 @@ export class Home extends Component<{}, homeState> {
         return (
             <>
                 <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" transition={Slide} />
-                <div className="d-flex HomePage">
-                    <Sidebar componentRender={this.componentRender} />
+                <div className="HomePage">
+                    <Sidebar components={this.state.components} componentRender={this.componentRender} />
                     <HomeComponent>{componentRender}</HomeComponent>
                 </div>
             </>

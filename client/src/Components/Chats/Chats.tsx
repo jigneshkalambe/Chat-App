@@ -10,13 +10,14 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import AudioFileIcon from "@mui/icons-material/AudioFile";
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined";
 interface joinRoomData {
     username: string;
     room: string;
 }
 
 interface data {
-    room: string | number;
     Author: string;
     messages: string;
     time: string;
@@ -56,7 +57,6 @@ interface chatStates {
     chatOpen: boolean;
     msg: string;
     roomData: joinRoomData;
-    // selectedUser: userData;
     isTyping: boolean;
     currentAuthor: string;
     activeUserId: string;
@@ -64,6 +64,8 @@ interface chatStates {
     IsviewModal: boolean;
     isAttachOpen: boolean;
     isModal: boolean;
+    windowWidth: number;
+    isPickerVisible: boolean;
 }
 
 interface chatProps {
@@ -134,19 +136,6 @@ export class Chats extends Component<chatProps, chatStates> {
                 username: "",
                 room: "",
             },
-            // selectedUser: {
-            //     _id: "",
-            //     photoName: "",
-            //     firstName: "",
-            //     lastName: "",
-            //     email: "",
-            //     gender: "",
-            //     age: "",
-            //     number: "",
-            //     location: "",
-            //     bio: "",
-            //     subtitle: "",
-            // },
             isTyping: false,
             currentAuthor: "",
             activeUserId: "",
@@ -154,7 +143,13 @@ export class Chats extends Component<chatProps, chatStates> {
             IsviewModal: false,
             isAttachOpen: true,
             isModal: false,
+            windowWidth: window.innerWidth,
+            isPickerVisible: false,
         };
+    }
+
+    componentDidMount(): void {
+        window.addEventListener("resize", this.handleResize);
     }
 
     componentDidUpdate(prevProps: chatProps) {
@@ -163,15 +158,32 @@ export class Chats extends Component<chatProps, chatStates> {
         }
     }
 
+    componentWillUnmount(): void {
+        window.removeEventListener("resize", this.handleResize);
+    }
+
+    handleResize = () => {
+        this.setState({ windowWidth: window.innerWidth });
+    };
+
+    toggleEmojiPicker = () => {
+        this.setState({ isPickerVisible: !this.state.isPickerVisible });
+    };
+
+    handleEmojiClick = (emojiData: EmojiClickData) => {
+        this.setState((prevState) => ({ msg: prevState.msg + emojiData.emoji }));
+    };
+
     chatMsg = (e: React.FormEvent) => {
         e.preventDefault();
         if (this.state.msg.trim()) {
-            console.log(this.state.msg);
             this.props.gettingMsg(this.props.selectedUser._id, this.state.msg);
             this.setState({
                 msg: "",
                 isAttachOpen: true,
             });
+        } else {
+            alert("Please enter a message");
         }
     };
 
@@ -200,20 +212,14 @@ export class Chats extends Component<chatProps, chatStates> {
         }
     };
 
-    // selectUserHandler = (user: userData) => {
-    //     this.setState({
-    //         selectedUser: user,
-    //     });
-    //     // console.log(user);
-    // };
-
     render() {
         const style = {
             position: "absolute",
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: "90%",
+            maxWidth: 400,
             bgcolor: "background.paper",
             boxShadow: 24,
             borderRadius: 5,
@@ -257,27 +263,6 @@ export class Chats extends Component<chatProps, chatStates> {
             overflow: "hidden",
         };
 
-        // getAttachModalStyle() {
-        //     const { linkTag } = this.props.LinksForModal;
-        //     return {
-        //         position: "absolute",
-        //         top: "50%",
-        //         left: "50%",
-        //         transform: "translate(-50%, -50%)",
-        //         width: "100%",
-        //         maxWidth: "fit-content",
-        //         height: linkTag === "video" || linkTag === "audio" ? "auto" : "100%",
-        //         maxHeight: "400px",
-        //         bgcolor: "background.paper",
-        //         boxShadow: 24,
-        //         borderRadius: 5,
-        //         display: "flex",
-        //         flexDirection: "column",
-        //         objectFit: "contain",
-        //         overflow: "hidden",
-        //     };
-        // }
-
         const renderMap =
             this.state.searchedUser !== ""
                 ? this.props.userData.filter((data: any) => {
@@ -289,9 +274,17 @@ export class Chats extends Component<chatProps, chatStates> {
                       );
                   })
                 : this.props.userData;
+
+        const chat_col_style1 = {
+            display: "flex",
+            alignItems: "start",
+            height: this.state.windowWidth > 991 ? "100%" : "auto",
+        };
+
+        const isSelected = Object.values(this.props.selectedUser).every((value) => value === "");
         return (
             <div className="chatBox">
-                <div className="col-lg-3" style={{ display: "flex", alignItems: "start" }}>
+                <div className="col-xl-3 col-lg-4 col-md-12 col-12" style={chat_col_style1}>
                     <div className="chat_left">
                         <div className="chat_header_box">
                             <input
@@ -309,13 +302,9 @@ export class Chats extends Component<chatProps, chatStates> {
                                         key={ind}
                                         className={this.state.activeUserId === val._id ? "active-user" : ""}
                                         onClick={() => {
-                                            this.setState(
-                                                {
-                                                    // selectedUser: val,
-                                                    activeUserId: val._id,
-                                                }
-                                                // () => console.log(this.state.activeUserId, val._id)
-                                            );
+                                            this.setState({
+                                                activeUserId: val._id,
+                                            });
                                         }}
                                     >
                                         <Users
@@ -391,7 +380,7 @@ export class Chats extends Component<chatProps, chatStates> {
                         </div>
                     </div>
                 </div>
-                <div className="col-lg-9 d-flex align-items-center justify-content-center">
+                <div className={`col-xl-9 col-lg-8 col-md-12 col-12 d-flex align-items-center justify-content-center ${isSelected ? "h-100" : ""}`}>
                     {Object.values(this.props.selectedUser).every((value) => value === "") ? (
                         "No Converstion or Messages"
                     ) : (
@@ -400,11 +389,11 @@ export class Chats extends Component<chatProps, chatStates> {
                                 <div>
                                     <Avatar src={this.props.userData.length !== 0 ? this.props.selectedUser.photoName : ""} sx={{ width: 50, height: 50, border: "1px solid #ccc" }} />
                                     <Stack>
-                                        <Typography variant="body1" component={"span"} sx={{ color: "black", fontWeight: 600, fontSize: "18px" }}>
+                                        <Typography variant="body1" component={"span"} sx={{ color: "black", fontWeight: 600, fontSize: "16px" }}>
                                             {this.props.selectedUser.firstName + " " + this.props.selectedUser.lastName}
                                         </Typography>
                                         <Typography sx={{ fontSize: "13px" }}>
-                                            {this.props.onlineState.some((id) => (id as unknown) !== this.props.selectedUser._id) ? "offline" : this.state.isTyping === true ? "Typing..." : "online"}
+                                            {this.props.onlineState.some((id) => (id as unknown) === this.props.selectedUser._id) ? "Online" : "Offline"}
                                             {/* {this.props.messages[this.props.selectedUser._id]?.find((msg) => msg.Author === this.props.selectedUser._id)
                                                     ? this.props.onlineState.some((id) => (id as unknown) === this.props.selectedUser._id)
                                                         ? "Online"
@@ -458,7 +447,6 @@ export class Chats extends Component<chatProps, chatStates> {
                                     <div
                                         key={index}
                                         style={{
-                                            // textAlign: msg.Author === this.props.selectedUser._id ? "left" : "right",
                                             float: msg.Author === this.props.selectedUser._id ? "left" : "right",
                                             clear: "both",
                                             margin: "16px 0",
@@ -469,31 +457,11 @@ export class Chats extends Component<chatProps, chatStates> {
                                             borderRadius: "10px",
                                         }}
                                     >
-                                        {/* <div
-                                            style={{
-                                                display: "inline-block",
-                                                padding: "10px",
-                                                borderRadius: "10px",
-                                                backgroundColor: msg.Author === this.props.selectedUser._id ? "#fff" : "#2196F3",
-                                                color: msg.Author === this.props.selectedUser._id ? "black" : "white",
-                                                maxWidth: "80%",
-                                            }}
-                                        > */}
                                         <span
-                                            // style={{
-                                            //     margin: 0,
-                                            //     // whiteSpace: "wrap",
-                                            //     // wordBreak: "break-all",
-                                            //     width: "auto",
-                                            //     // textAlign: msg.Author === this.props.selectedUser._id ? "end" : "start",
-                                            // }}
                                             style={{
                                                 display: "inline-block",
-                                                // padding: "10px",
                                                 borderRadius: "10px",
-                                                // backgroundColor: msg.Author === this.props.selectedUser._id ? "#fff" : "#2196F3",
                                                 color: msg.Author === this.props.selectedUser._id ? "black" : "white",
-                                                // maxWidth: "80%",
                                                 width: "auto",
                                                 float: msg.Author === this.props.selectedUser._id ? "left" : "right",
                                                 clear: "both",
@@ -502,7 +470,6 @@ export class Chats extends Component<chatProps, chatStates> {
                                         >
                                             {msg.messages}
                                         </span>
-                                        {/* {this.props.Img.url !== "" ? <img src={msg.Image} alt={msg.Image} width={"300px"}></img> : undefined} */}
                                         <img
                                             style={{ cursor: "pointer" }}
                                             src={msg.Image}
@@ -548,7 +515,6 @@ export class Chats extends Component<chatProps, chatStates> {
                                         >
                                             {msg.time}
                                         </span>
-                                        {/* </div> */}
                                     </div>
                                 ))}
                             </div>
@@ -583,6 +549,16 @@ export class Chats extends Component<chatProps, chatStates> {
                             </Modal>
                             <form onSubmit={this.chatMsg}>
                                 <div className="chat_footer">
+                                    <div className="EmojiDiv">
+                                        <Button onClick={this.toggleEmojiPicker} variant="text" sx={{ borderRadius: "100%", width: "45px", height: "45px", minWidth: "45px", color: "rgb(59,68,75)" }}>
+                                            <EmojiEmotionsOutlinedIcon />
+                                        </Button>
+                                    </div>
+                                    {this.state.isPickerVisible && (
+                                        <div style={{ position: "absolute", bottom: "70px", left: "10px", zIndex: 10 }}>
+                                            <EmojiPicker onEmojiClick={this.handleEmojiClick} />
+                                        </div>
+                                    )}
                                     <input
                                         value={this.state.msg}
                                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -643,11 +619,11 @@ export class Chats extends Component<chatProps, chatStates> {
                                             });
                                         }}
                                         variant="contained"
-                                        sx={{ borderRadius: "100%", width: 45, height: 45, minWidth: 0, backgroundColor: "#ccc", color: "black" }}
+                                        sx={{ borderRadius: "100%", width: 45, height: 45, minWidth: 45, backgroundColor: "#ccc", color: "black" }}
                                     >
                                         <AttachFileIcon />
                                     </Button>
-                                    <Button type="submit" variant="contained" sx={{ borderRadius: "20px", height: "45px", backgroundColor: "#2196F3" }}>
+                                    <Button type="submit" variant="contained" sx={{ borderRadius: "20px", width: "45px", height: "45px", minWidth: "45px", backgroundColor: "#2196F3" }}>
                                         <SendOutlinedIcon />
                                     </Button>
                                 </div>

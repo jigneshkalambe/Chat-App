@@ -8,6 +8,7 @@ import { Typography } from "@mui/material";
 
 interface sidebarProps {
     componentRender: (val: string) => void;
+    components: string;
 }
 
 export class Sidebar extends Component<sidebarProps, {}> {
@@ -27,8 +28,8 @@ export class Sidebar extends Component<sidebarProps, {}> {
                     </div>
                 </div>
                 <div className="Sidebar_Body">
-                    <div>
-                        <div className="Sidebar_section" onClick={() => this.handlerComponent("Profile")}>
+                    <div className="Sidebar_Body_row">
+                        <div className={`Sidebar_section ${this.props.components === "Profile" ? "activeComponent" : ""}`} onClick={() => this.handlerComponent("Profile")}>
                             <div className="header_icon">
                                 <PersonOutlinedIcon />
                             </div>
@@ -37,7 +38,7 @@ export class Sidebar extends Component<sidebarProps, {}> {
                             </div>
                         </div>
 
-                        <div className="Sidebar_section" onClick={() => this.handlerComponent("Chats")}>
+                        <div className={`Sidebar_section ${this.props.components === "Chats" ? "activeComponent" : ""}`} onClick={() => this.handlerComponent("Chats")}>
                             <div className="header_icon">
                                 <SendOutlinedIcon />
                             </div>
@@ -46,7 +47,7 @@ export class Sidebar extends Component<sidebarProps, {}> {
                             </div>
                         </div>
                     </div>
-                    <div>
+                    <div className="d-flex justify-content-center align-item">
                         <button
                             className="Sidebar_section"
                             onClick={() => {

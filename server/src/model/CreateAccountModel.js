@@ -1,10 +1,6 @@
 const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema({
-    room: {
-        type: mongoose.Schema.Types.Mixed,
-        required: true,
-    },
     Author: {
         type: String,
         required: true,

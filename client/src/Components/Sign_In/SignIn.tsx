@@ -65,9 +65,9 @@ export class SignIn extends Component<props> {
                         <Stack direction={"row"} sx={{ justifyContent: "space-between", marginTop: "10px" }}>
                             <div className="d-flex gap-2 align-items-center ">
                                 <HocInput type="checkbox" name="Remember me"></HocInput>
-                                <Typography>Remember Me</Typography>
+                                <Typography className="signin_texts">Remember Me</Typography>
                             </div>
-                            <Link href="#" underline="hover" sx={{ color: "#000" }}>
+                            <Link className="signin_texts" href="#" underline="hover" sx={{ color: "#000" }}>
                                 Forgot Your Password ?
                             </Link>
                         </Stack>

@@ -1,7 +1,7 @@
 .SideBar {
     width: 80px;
     height: 100vh;
-    transition: width 0.5s linear, box-shadow 0.4s ease-in-out;
+    transition: width 0.4s linear, box-shadow 0.4s ease-in-out;
     padding: 10px !important;
     overflow: hidden;
     display: flex;
@@ -30,9 +30,12 @@
     height: 100%;
 }
 
+.Sidebar_Body_row {
+    display: flex;
+}
+
 .Sidebar_Body > div {
     display: flex;
-    flex-direction: column;
     gap: 13px;
     margin-top: 30px;
 }
@@ -70,19 +73,12 @@
 }
 
 .SideBar:hover {
-    width: 255px;
     box-shadow: 4px 0px 16px rgba(0, 0, 0, 0.25);
-}
-
-.SideBar:hover .Sidebar_header,
-.SideBar:hover .Sidebar_section {
-    width: 200px;
 }
 
 .SideBar:hover .header_text {
     display: flex;
     width: 100%;
-    margin-left: 40px;
 }
 
 .SideBar:hover .header_icon {
@@ -107,4 +103,124 @@ button.Sidebar_section {
 
 button.Sidebar_section:hover {
     background-color: red !important;
+}
+
+.activeComponent {
+    background-color: rgb(243 244 246);
+}
+
+@media (max-width: 576px) {
+    .SideBar {
+        flex-direction: row-reverse;
+        width: 100%;
+        height: auto;
+        position: sticky;
+        box-shadow: none;
+        justify-content: space-around;
+        align-items: center;
+        bottom: 0;
+        background-color: white;
+        z-index: 100;
+        border-top: 1px solid #ccc;
+    }
+
+    .Sidebar_Body > div {
+        margin: 0;
+    }
+
+    .Sidebar_Body_row {
+        flex-direction: row;
+    }
+
+    .Sidebar_Body > div:nth-child(2) {
+        margin-left: 13px;
+    }
+
+    .Sidebar_header {
+        display: none;
+    }
+
+    .Sidebar_Body {
+        flex-direction: row;
+        justify-content: space-around;
+        height: auto;
+        margin-top: 0;
+    }
+
+    .Sidebar_section {
+        flex-direction: column;
+        align-items: center;
+        width: auto;
+        height: auto;
+        padding: 10px;
+        border-radius: 0;
+    }
+
+    .Sidebar_section p {
+        display: none;
+    }
+
+    .header_icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .header_icon svg {
+        width: 30px;
+        height: 30px;
+    }
+
+    .header_text {
+        display: block;
+        text-align: center;
+        font-size: 12px;
+    }
+
+    .SideBar:hover .header_icon {
+        width: 40px;
+    }
+}
+
+@media (min-width: 576px) {
+    .SideBar:hover {
+        width: 255px;
+    }
+
+    .SideBar:hover .header_text {
+        margin-left: 20px;
+    }
+
+    .Sidebar_Body_row {
+        flex-direction: column;
+    }
+}
+
+@media (min-width: 768px) {
+    .SideBar:hover {
+        width: 255px;
+    }
+
+    .SideBar:hover .header_text {
+        margin-left: 30px;
+    }
+}
+
+@media (min-width: 992px) {
+    .SideBar:hover {
+        width: 255px;
+    }
+
+    .SideBar:hover .header_text {
+        margin-left: 40px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .SideBar:hover {
+        width: 255px;
+    }
+
+    .SideBar:hover .header_text {
+        margin-left: 40px;
+    }
 }

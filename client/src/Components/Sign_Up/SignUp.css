@@ -29,3 +29,27 @@
     top: 20px;
     right: 20px;
 }
+
+@media (max-width: 576px) {
+    .SignUpCard {
+        width: 90%;
+    }
+}
+
+@media (min-width: 576px) {
+    .SignUpCard {
+        width: 90%;
+    }
+}
+
+@media (min-width: 992px) {
+    .SignUpCard {
+        width: 90%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .SignUpCard {
+        width: 1000px;
+    }
+}

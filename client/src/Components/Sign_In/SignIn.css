@@ -12,3 +12,14 @@
     box-shadow: rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px, rgba(17, 17, 26, 0.1) 0px 24px 80px !important;
     color: black !important;
 }
+
+.signin_texts {
+    font-size: clamp(14px, 3vw, 16px) !important;
+}
+
+@media (max-width: 576px) {
+    .MainCard {
+        width: 90%;
+        padding: 20px;
+    }
+}

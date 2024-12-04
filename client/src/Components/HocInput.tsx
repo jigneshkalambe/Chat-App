@@ -143,7 +143,6 @@ export class HocInput extends Component<typesOfInput, ControllerStates> {
 
             if (name === "gender") {
                 value = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-                // console.log(value);
                 if (value === "Male" || value === "Female") {
                     errs.gender = "";
                     fieldColors = "green";
@@ -257,10 +256,6 @@ export class HocInput extends Component<typesOfInput, ControllerStates> {
                 errs.age = "Please enter your age";
             } else if (name === "number" && this.props.formData?.number.length === 0) {
                 errs.number = "Please enter your number";
-            } else {
-                // this.setState({
-                //     err: { ...this.state.err, [name]: "" },
-                // });
             }
 
             this.setState({
@@ -330,15 +325,13 @@ export class HocInput extends Component<typesOfInput, ControllerStates> {
         };
 
         return (
-            <div style={type === "checkbox" ? { marginBottom: "0px ", display: "flex", justifyContent: "center", alignItems: "center" } : { marginBottom: "10px" }}>
-                {/* Optional Label */}
+            <div style={type === "checkbox" ? { marginBottom: "0px ", display: "flex", justifyContent: "center", alignItems: "center" } : { marginBottom: "10px", width: "100%" }}>
                 {labelText && (
                     <Typography variant="body1" component="span" style={type === "checkbox" ? checkMargin : labelMargin}>
                         {labelText}
                     </Typography>
                 )}
 
-                {/* Input Field */}
                 <div className="position-relative d-flex justify-content-center align-items-center">
                     <input
                         type={type !== "password" ? type : this.state.eye === false ? "password" : "text"}

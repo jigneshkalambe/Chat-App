@@ -29,8 +29,8 @@
 }
 
 ::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -71,7 +71,7 @@
 }
 
 .profilePhotoLine p {
-    font-size: 30px;
+    font-size: clamp(25px, 6vw, 30px);
     font-weight: 800;
 }
 
@@ -133,4 +133,42 @@
     display: flex;
     justify-content: flex-end;
     gap: 15px;
+}
+
+@media (max-width: 576px) {
+    .MainProfile {
+        width: 95%;
+    }
+
+    .profilePhotoLine {
+        padding: 0 0 20px 0;
+    }
+
+    .ButtonLine {
+        justify-content: center;
+    }
+}
+
+@media (min-width: 576px) {
+    .MainProfile {
+        width: 95%;
+    }
+}
+
+@media (min-width: 768px) {
+    .MainProfile {
+        width: 80%;
+    }
+}
+
+@media (min-width: 992px) {
+    .MainProfile {
+        width: 80%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .MainProfile {
+        width: 70%;
+    }
 }
