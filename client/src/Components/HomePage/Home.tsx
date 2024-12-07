@@ -150,7 +150,7 @@ export class Home extends Component<{}, homeState> {
             orderId: "",
             paymentSuccessfully: false,
         };
-        this.socket = io("http://localhost:5000");
+        this.socket = io("https://chat-app-qu8l.onrender.com/");
         this.autoScroll = React.createRef();
     }
 
