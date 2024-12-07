@@ -27,8 +27,10 @@
 
 @media (max-width: 576px) {
     .img_modal {
-        width: 60%;
-        height: 50%;
+        max-width: 90%;
+        width: 100%;
+        height: auto;
+        max-height: 90%;
     }
 }
 

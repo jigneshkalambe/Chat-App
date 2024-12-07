@@ -1,6 +1,7 @@
 const Accounts = require("../model/CreateAccountModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const SubscriptionModel = require("../model/SubscriptionModel");
 
 const CreateAccount = async (req, res) => {
     try {
@@ -176,8 +177,11 @@ const userAccountMsg = async (req, res) => {
         const currentAccount = await Accounts.findOne({ email: currentAccEmail });
         if (currentAccount) {
             currentAccount.messages = messages;
-            // await currentAccount.save();
-            console.log(messages);
+            await currentAccount.save();
+            const subscription = req.subscription;
+            subscription.messagesSent += 1;
+            await subscription.save();
+
             res.status(200).json({ message: "Messages updated successfully", currentAccount });
         } else {
             console.log("Current Account not found");

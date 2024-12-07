@@ -386,25 +386,34 @@ export class Chats extends Component<chatProps, chatStates> {
                     ) : (
                         <div className="chat_body">
                             <div className="chat_msg_header">
-                                <div>
-                                    <Avatar src={this.props.userData.length !== 0 ? this.props.selectedUser.photoName : ""} sx={{ width: 50, height: 50, border: "1px solid #ccc" }} />
-                                    <Stack>
-                                        <Typography variant="body1" component={"span"} sx={{ color: "black", fontWeight: 600, fontSize: "16px" }}>
-                                            {this.props.selectedUser.firstName + " " + this.props.selectedUser.lastName}
-                                        </Typography>
-                                        <Typography sx={{ fontSize: "13px" }}>
-                                            {this.props.onlineState.some((id) => (id as unknown) === this.props.selectedUser._id) ? "Online" : "Offline"}
-                                            {/* {this.props.messages[this.props.selectedUser._id]?.find((msg) => msg.Author === this.props.selectedUser._id)
+                                <Tooltip title="Click here to view the user's profile" placement="bottom">
+                                    <div
+                                        onClick={() => {
+                                            this.setState({
+                                                IsviewModal: true,
+                                            });
+                                        }}
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        <Avatar src={this.props.userData.length !== 0 ? this.props.selectedUser.photoName : ""} sx={{ width: 50, height: 50, border: "1px solid #ccc" }} />
+                                        <Stack>
+                                            <Typography variant="body1" component={"span"} sx={{ color: "black", fontWeight: 600, fontSize: "16px" }}>
+                                                {this.props.selectedUser.firstName + " " + this.props.selectedUser.lastName}
+                                            </Typography>
+                                            <Typography sx={{ fontSize: "13px" }}>
+                                                {this.props.onlineState.some((id) => (id as unknown) === this.props.selectedUser._id) ? "Online" : "Offline"}
+                                                {/* {this.props.messages[this.props.selectedUser._id]?.find((msg) => msg.Author === this.props.selectedUser._id)
                                                     ? this.props.onlineState.some((id) => (id as unknown) === this.props.selectedUser._id)
                                                         ? "Online"
                                                         : this.state.isTyping === true
                                                         ? "Typing..."
                                                         : "Offline"
                                                     : "Offline"} */}
-                                        </Typography>
-                                    </Stack>
-                                </div>
-                                <div>
+                                            </Typography>
+                                        </Stack>
+                                    </div>
+                                </Tooltip>
+                                {/* <div>
                                     <Button
                                         onClick={() => {
                                             this.setState({
@@ -416,7 +425,7 @@ export class Chats extends Component<chatProps, chatStates> {
                                     >
                                         View Profile
                                     </Button>
-                                </div>
+                                </div> */}
 
                                 <Modal
                                     aria-labelledby="spring-modal-title"
@@ -455,6 +464,7 @@ export class Chats extends Component<chatProps, chatStates> {
                                             backgroundColor: msg.Author === this.props.selectedUser._id ? "#fff" : "#2196F3",
                                             padding: "10px",
                                             borderRadius: "10px",
+                                            display: "flex",
                                         }}
                                     >
                                         <span
@@ -507,10 +517,15 @@ export class Chats extends Component<chatProps, chatStates> {
                                         <span
                                             style={{
                                                 width: "auto",
-                                                display: "inline-block",
+                                                // display: "inline-block",
                                                 fontSize: "11px",
                                                 color: msg.Author === this.props.selectedUser._id ? "black" : "white",
                                                 whiteSpace: "nowrap",
+                                                // clear: "both",
+                                                // float: "right",
+                                                display: "flex",
+                                                margin: "8px 0px 0px 8px",
+                                                alignItems: "flex-end",
                                             }}
                                         >
                                             {msg.time}

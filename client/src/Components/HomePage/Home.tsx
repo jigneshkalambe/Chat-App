@@ -8,6 +8,8 @@ import axios from "axios";
 import { Slide, toast, ToastContainer } from "react-toastify";
 import { io, Socket } from "socket.io-client";
 import { supabase } from "../supabaseClient";
+import { load } from "@cashfreepayments/cashfree-js";
+import Subscription from "../Subscription/Subscription";
 
 interface formDataTypes {
     photoName: string;
@@ -78,8 +80,10 @@ interface homeState {
     VideoURL: string;
     isAttach: boolean;
     LinksForModal: LinksForModalTypes;
+    cashfree: any;
+    orderId: string;
+    paymentSuccessfully: boolean;
 }
-
 export class Home extends Component<{}, homeState> {
     private autoScroll: React.RefObject<HTMLDivElement>;
     private socket: Socket;
@@ -142,6 +146,9 @@ export class Home extends Component<{}, homeState> {
                 linkTag: "",
                 link: "",
             },
+            cashfree: "",
+            orderId: "",
+            paymentSuccessfully: false,
         };
         this.socket = io("http://localhost:5000");
         this.autoScroll = React.createRef();
@@ -149,9 +156,8 @@ export class Home extends Component<{}, homeState> {
 
     componentDidMount(): void {
         this.currentAccount();
-
         this.socket.on("connect", () => {
-            console.log("Connected to the server", this.socket.id);
+            // console.log("Connected to the server", this.socket.id);
         });
 
         const userId = localStorage.getItem("userId");
@@ -190,6 +196,7 @@ export class Home extends Component<{}, homeState> {
                 async () => {
                     await axios
                         .post(`${process.env.REACT_APP_API_URL}/account/msg`, {
+                            userId,
                             currentAccEmail: this.state.formData.email,
                             messages: this.state.messages,
                         })
@@ -212,13 +219,15 @@ export class Home extends Component<{}, homeState> {
         });
 
         this.socket.on("onlineUsers", (online) => {
-            console.log("Online Users", online);
+            // console.log("Online Users", online);
             this.setState({ onlineState: online });
         });
 
         this.socket.on("disconnect", () => {
             console.log("Disconnectd to the server", this.socket.id);
         });
+
+        this.initialzeSdk();
     }
 
     componentWillUnmount() {
@@ -231,6 +240,11 @@ export class Home extends Component<{}, homeState> {
     componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<homeState>, snapshot?: any): void {
         if (prevState.messages !== this.state.messages) {
             this.scrollToBottom();
+            // this.premiumChatHandler();
+        }
+
+        if (this.state.formData.email && this.state.formData.email !== prevState.formData.email) {
+            this.checkSubscriptionStatus();
         }
     }
 
@@ -247,28 +261,35 @@ export class Home extends Component<{}, homeState> {
                 const userId = localStorage.getItem("userId");
                 const apiAccounts = res.data.accounts;
                 const currentAccount = apiAccounts.find((acc: any) => acc._id === userId);
+                // console.log("CurrentAccount", currentAccount);
                 if (currentAccount) {
-                    this.setState({
-                        apiData: { currentAccount },
-                        formData: {
-                            photoName: currentAccount?.photoName || "",
-                            firstName: currentAccount?.firstName || "",
-                            lastName: currentAccount?.lastName || "",
-                            email: currentAccount?.email || "",
-                            gender: currentAccount?.gender || "",
-                            age: currentAccount?.age || "",
-                            number: currentAccount?.number || "",
-                            location: currentAccount?.location || "",
-                            bio: currentAccount?.bio || "",
-                            subtitle: currentAccount?.subtitle || "",
+                    this.setState(
+                        {
+                            apiData: { currentAccount },
+                            formData: {
+                                photoName: currentAccount?.photoName || "",
+                                firstName: currentAccount?.firstName || "",
+                                lastName: currentAccount?.lastName || "",
+                                email: currentAccount?.email || "",
+                                gender: currentAccount?.gender || "",
+                                age: currentAccount?.age || "",
+                                number: currentAccount?.number || "",
+                                location: currentAccount?.location || "",
+                                bio: currentAccount?.bio || "",
+                                subtitle: currentAccount?.subtitle || "",
+                            },
+                            photoLink: currentAccount?.photoName,
+                            data: {
+                                ...this.state.data,
+                            },
+                            userData: currentAccount?.newUserLists,
+                            messages: currentAccount?.messages || {},
+                            paymentSuccessfully: currentAccount?.paymentSuccessfully,
                         },
-                        photoLink: currentAccount?.photoName,
-                        data: {
-                            ...this.state.data,
-                        },
-                        userData: currentAccount?.newUserLists,
-                        messages: currentAccount?.messages || {},
-                    });
+                        () => {
+                            this.checkSubscriptionStatus();
+                        }
+                    );
                 }
             })
             .catch((err) => console.log(err));
@@ -516,6 +537,7 @@ export class Home extends Component<{}, homeState> {
     };
 
     gettingMsg = async (recipientId: string, value: string) => {
+        await this.checkSubscriptionStatus();
         const senderId = localStorage.getItem("userId");
 
         const newMessage = {
@@ -527,51 +549,63 @@ export class Home extends Component<{}, homeState> {
             time: new Date().toLocaleTimeString(),
         };
 
-        this.setState(
-            (prevState) => ({
-                messages: {
-                    ...prevState.messages,
-                    [recipientId]: [...(prevState.messages[recipientId] || []), newMessage],
-                },
-            }),
-            async () => {
-                this.socket.emit("privateMessage", {
-                    toUserId: recipientId,
-                    senderId,
-                    message: value,
-                    Image: this.state.Img.url,
-                    audio: this.state.AudioURL,
-                    video: this.state.VideoURL,
-                    time: new Date().toLocaleTimeString(),
+        if (!this.state.paymentSuccessfully) {
+            // eslint-disable-next-line no-restricted-globals
+            if (confirm("Buy Premium package to unlock chatting service")) {
+                this.setState({
+                    components: "Subscriptions",
                 });
-
-                await axios
-                    .post(`${process.env.REACT_APP_API_URL}/account/msg`, {
-                        currentAccEmail: this.state.formData.email,
-                        messages: this.state.messages,
-                    })
-                    .then((res) => {
-                        console.log(res);
-                    })
-                    .catch((err) => {
-                        console.log(err);
+            } else {
+                console.log("Cancel");
+            }
+        } else {
+            this.setState(
+                (prevState) => ({
+                    messages: {
+                        ...prevState.messages,
+                        [recipientId]: [...(prevState.messages[recipientId] || []), newMessage],
+                    },
+                }),
+                async () => {
+                    this.socket.emit("privateMessage", {
+                        toUserId: recipientId,
+                        senderId,
+                        message: value,
+                        Image: this.state.Img.url,
+                        audio: this.state.AudioURL,
+                        video: this.state.VideoURL,
+                        time: new Date().toLocaleTimeString(),
                     });
 
-                this.setState({
-                    Img: {
-                        file: null,
-                        url: "",
-                    },
-                    VideoURL: "",
-                    AudioURL: "",
-                    isAttach: false,
-                    LinksForModal: {
-                        link: "",
-                        linkTag: "",
-                    },
-                });
-            }
-        );
+                    await axios
+                        .post(`${process.env.REACT_APP_API_URL}/account/msg`, {
+                            userId: localStorage.getItem("userId"),
+                            currentAccEmail: this.state.formData.email,
+                            messages: this.state.messages,
+                        })
+                        .then((res) => {
+                            console.log(res);
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                        });
+
+                    this.setState({
+                        Img: {
+                            file: null,
+                            url: "",
+                        },
+                        VideoURL: "",
+                        AudioURL: "",
+                        isAttach: false,
+                        LinksForModal: {
+                            link: "",
+                            linkTag: "",
+                        },
+                    });
+                }
+            );
+        }
     };
 
     deleteNewUserList = async (user: userData) => {
@@ -645,11 +679,151 @@ export class Home extends Component<{}, homeState> {
         });
     };
 
+    initialzeSdk = async () => {
+        this.setState({
+            cashfree: await load({
+                mode: "sandbox",
+            }),
+        });
+    };
+
+    getSessionId = async (amount: string) => {
+        try {
+            if (this.state.messages[this.state.selectedUser._id]?.filter((val) => val.Author === "me").length >= 9) {
+                this.setState({
+                    paymentSuccessfully: false,
+                });
+            }
+
+            await axios
+                .post(`${process.env.REACT_APP_API_URL}/chatService/payment`, { amount: amount.toString() })
+                .then((res) => {
+                    if (res.data) {
+                        console.log(res.data);
+                        this.setState({
+                            orderId: res.data.order_id,
+                        });
+                        let sessionId = res.data.payment_session_id;
+                        let checkoutOptions = {
+                            paymentSessionId: sessionId,
+                            redirectTarget: "_modal",
+                        };
+
+                        this.state.cashfree.checkout(checkoutOptions).then((res: any) => {
+                            console.log(res);
+                            this.verifyPayment(res, amount);
+                        });
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    verifyPayment = async (res: any, amount: string) => {
+        try {
+            let response = await axios.post(`${process.env.REACT_APP_API_URL}/chatService/verify`, {
+                orderId: this.state.orderId,
+            });
+            console.log(response);
+
+            if (res.paymentDetails) {
+                toast.success("Payment successful", {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                    transition: Slide,
+                });
+                this.setState(
+                    {
+                        paymentSuccessfully: true,
+                    },
+                    async () => {
+                        try {
+                            let response = await axios.post(`${process.env.REACT_APP_API_URL}/chatService/isPayment`, {
+                                paymentSuccessfully: this.state.paymentSuccessfully,
+                                currentAccEmail: this.state.formData.email,
+                                amount: amount.toString(),
+                            });
+                            console.log(response);
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    }
+                );
+            } else {
+                toast.error(res.error.message, {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                    transition: Slide,
+                });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    subscriptionsHandler = (amount: string) => {
+        if (this.state.paymentSuccessfully) {
+            toast.error("Plan is already purchased!", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "light",
+                transition: Slide,
+            });
+            return;
+        } else {
+            this.getSessionId(amount.toString());
+        }
+    };
+
+    checkSubscriptionStatus = async () => {
+        const email = this.state.formData?.email;
+        if (!email) {
+            console.error("Email is not defined.");
+            return;
+        }
+
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/plan/subscription/${email}`);
+            const { isExpired } = response.data;
+            // console.log(response);
+            if (isExpired) {
+                this.setState({ paymentSuccessfully: false });
+                toast.warning("Your subscription has expired. Please renew to continue.", {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "light",
+                    transition: Slide,
+                });
+            }
+        } catch (error) {
+            console.error("Error checking subscription status:", error);
+        }
+    };
+
     render() {
-        console.log("Messages", this.state.messages);
         const { components } = this.state;
         let componentRender: JSX.Element | null = null;
-
         if (components === "Profile") {
             componentRender = (
                 <Profile
@@ -691,6 +865,8 @@ export class Home extends Component<{}, homeState> {
                     LinksForModal={this.state.LinksForModal}
                 />
             );
+        } else if (components === "Subscriptions") {
+            componentRender = <Subscription subscriptionsHandler={this.subscriptionsHandler} />;
         }
         return (
             <>

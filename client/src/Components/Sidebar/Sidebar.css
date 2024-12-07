@@ -72,6 +72,10 @@
     display: none;
 }
 
+.header_signout {
+    display: none;
+}
+
 .SideBar:hover {
     box-shadow: 4px 0px 16px rgba(0, 0, 0, 0.25);
 }
@@ -79,10 +83,17 @@
 .SideBar:hover .header_text {
     display: flex;
     width: 100%;
+    margin-left: 20px;
 }
 
 .SideBar:hover .header_icon {
     width: 30px;
+}
+
+.SideBar:hover .header_signout {
+    display: flex;
+    width: 100%;
+    justify-content: center;
 }
 
 .Sidebar_section:hover {
@@ -152,7 +163,7 @@ button.Sidebar_section:hover {
         align-items: center;
         width: auto;
         height: auto;
-        padding: 10px;
+        padding: 8px !important;
         border-radius: 0;
     }
 
@@ -186,10 +197,6 @@ button.Sidebar_section:hover {
         width: 255px;
     }
 
-    .SideBar:hover .header_text {
-        margin-left: 20px;
-    }
-
     .Sidebar_Body_row {
         flex-direction: column;
     }
@@ -199,28 +206,16 @@ button.Sidebar_section:hover {
     .SideBar:hover {
         width: 255px;
     }
-
-    .SideBar:hover .header_text {
-        margin-left: 30px;
-    }
 }
 
 @media (min-width: 992px) {
     .SideBar:hover {
         width: 255px;
     }
-
-    .SideBar:hover .header_text {
-        margin-left: 40px;
-    }
 }
 
 @media (min-width: 1200px) {
     .SideBar:hover {
         width: 255px;
-    }
-
-    .SideBar:hover .header_text {
-        margin-left: 40px;
     }
 }

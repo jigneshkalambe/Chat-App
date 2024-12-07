@@ -154,6 +154,10 @@ const CreateAccountSchema = new mongoose.Schema(
             type: Map,
             of: [messageSchema],
         },
+        paymentSuccessfully: {
+            type: Boolean,
+            default: false,
+        },
     },
     {
         timestamps: true,
