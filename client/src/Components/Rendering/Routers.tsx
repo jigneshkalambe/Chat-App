@@ -1,15 +1,27 @@
 import React, { Component } from "react";
-import { Route, Switch } from "react-router-dom";
+import { Redirect, Route, Switch } from "react-router-dom";
 import Home from "../HomePage/Home";
 import Layout from "./Layout";
 
 export class Routers extends Component {
     render() {
+        const userId = localStorage.getItem("userId");
         return (
             <>
                 <Switch>
-                    <Route exact path="/" component={Layout} />
-                    <Route path="/home" component={Home} />
+                    <Route
+                        exact
+                        path="/"
+                        render={() => {
+                            return userId ? <Redirect to={"/home"} /> : <Layout />;
+                        }}
+                    />
+                    <Route
+                        path="/home"
+                        render={() => {
+                            return userId ? <Home /> : <Redirect to={"/"} />;
+                        }}
+                    />
                 </Switch>
             </>
         );
