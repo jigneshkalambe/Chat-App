@@ -224,7 +224,7 @@ export class Home extends Component<{}, homeState> {
         });
 
         this.socket.on("disconnect", () => {
-            console.log("Disconnectd to the server", this.socket.id);
+            // console.log("Disconnectd to the server", this.socket.id);
         });
 
         this.initialzeSdk();

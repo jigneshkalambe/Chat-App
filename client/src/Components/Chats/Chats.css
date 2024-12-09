@@ -136,8 +136,7 @@
 
 @media (max-width: 576px) {
     .chat_users {
-        /* height: 300px; */
-        height: auto;
+        height: 300px;
     }
 
     .chatBox {
@@ -150,11 +149,11 @@
 
     .chat_left {
         border-right: 1px solid #ccc;
-        height: 500px;
     }
 
     .chat_body {
         border-right: 1px solid #ccc;
+        height: 650px;
     }
 
     .chat_footer {

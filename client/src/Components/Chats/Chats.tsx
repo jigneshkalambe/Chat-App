@@ -460,11 +460,12 @@ export class Chats extends Component<chatProps, chatStates> {
                                             clear: "both",
                                             margin: "16px 0",
                                             width: "auto",
-                                            maxWidth: "80%",
+                                            maxWidth: "90%",
                                             backgroundColor: msg.Author === this.props.selectedUser._id ? "#fff" : "#2196F3",
                                             padding: "10px",
                                             borderRadius: "10px",
                                             display: "flex",
+                                            flexWrap: "wrap",
                                         }}
                                     >
                                         <span
@@ -488,7 +489,7 @@ export class Chats extends Component<chatProps, chatStates> {
                                                     isModal: true,
                                                 });
                                             }}
-                                            width={msg.Image ? "300px" : "0px"}
+                                            width={!msg.Image ? "0px" : this.state.windowWidth > 576 ? "300px" : "100%"}
                                             alt={""}
                                         ></img>
                                         <Modal
@@ -502,7 +503,7 @@ export class Chats extends Component<chatProps, chatStates> {
                                             aria-describedby="modal-modal-description"
                                         >
                                             <Box sx={isModal_style}>
-                                                <img src={msg.Image} width={msg.Image ? "300px" : "0px"} alt={""}></img>
+                                                <img src={msg.Image} width={!msg.Image ? "0px" : this.state.windowWidth > 576 ? "300px" : "100%"} alt={""}></img>
                                             </Box>
                                         </Modal>
                                         {msg.audio ? (
@@ -510,7 +511,11 @@ export class Chats extends Component<chatProps, chatStates> {
                                                 <source src={msg.audio ? msg.audio : undefined} />
                                             </audio>
                                         ) : undefined}
-                                        <video width={msg.video ? "300px" : "0px"} height={msg.video ? "auto" : "0px"} controls>
+                                        <video
+                                            width={!msg.video ? "0px" : this.state.windowWidth > 576 ? "300px" : "100%"}
+                                            height={!msg.video ? "0px" : this.state.windowWidth > 576 ? "auto" : "300px"}
+                                            controls
+                                        >
                                             <source src={msg.video} type="video/mp4" />
                                         </video>
                                         <div ref={this.props.autoDiv}></div>
