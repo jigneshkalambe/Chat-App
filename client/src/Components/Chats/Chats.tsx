@@ -236,14 +236,10 @@ export class Chats extends Component<chatProps, chatStates> {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            // width: this.state.windowWidth > 576 ? "auto" : "100%",
-            // height: this.state.windowWidth > 576 ? "100%" : "auto",
-            // maxHeight: "500px",
-            // maxWidth: "70%",
             width: this.state.windowWidth > 576 ? "100%" : "80%",
-            height: this.state.windowWidth > 576 ? "100%" : "auto",
-            maxWidth: this.state.windowWidth > 576 ? "500px" : "90%",
-            maxHeight: this.state.windowWidth > 576 ? "500px" : "90%",
+            height: "100%",
+            maxWidth: this.state.windowWidth > 576 ? "400px" : "70%",
+            maxHeight: this.state.windowWidth > 576 ? "400px" : "70%",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
@@ -255,7 +251,7 @@ export class Chats extends Component<chatProps, chatStates> {
             border: "none",
             display: "block",
             height: "100%",
-            ...(this.state.windowWidth > 576 && { objectFit: "contain" }),
+            objectFit: "contain",
         };
 
         const attach_modal_style = {

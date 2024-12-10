@@ -17,6 +17,7 @@ interface formDataTypes {
 
 interface profileStates {
     open: boolean;
+    windowWidth: number;
 }
 
 interface profileProps {
@@ -37,8 +38,22 @@ export class Profile extends Component<profileProps, profileStates> {
         super(props);
         this.state = {
             open: false,
+            windowWidth: window.innerWidth,
         };
     }
+
+    componentDidMount(): void {
+        window.addEventListener("resize", this.handleResize);
+    }
+
+    componentWillUnmount(): void {
+        window.removeEventListener("resize", this.handleResize);
+    }
+
+    handleResize = () => {
+        this.setState({ windowWidth: window.innerWidth });
+    };
+
     render() {
         const data = this.props.apiData;
         const currentData = data.currentAccount;
@@ -56,17 +71,22 @@ export class Profile extends Component<profileProps, profileStates> {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: "auto",
-            height: "auto",
-            maxHeight: "600px",
-            maxWidth: "70%",
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            borderRadius: 1,
+            width: this.state.windowWidth > 576 ? "100%" : "80%",
+            height: "100%",
+            maxWidth: this.state.windowWidth > 576 ? "400px" : "70%",
+            maxHeight: this.state.windowWidth > 576 ? "400px" : "70%",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
             border: "none",
+            outline: "none",
+        };
+
+        const isModal_imgStyle = {
+            border: "none",
+            display: "block",
+            height: "100%",
+            objectFit: "contain",
         };
 
         return (
@@ -102,7 +122,7 @@ export class Profile extends Component<profileProps, profileStates> {
                                     aria-describedby="modal-modal-description"
                                 >
                                     <Box sx={style}>
-                                        <img src={this.props.photoLink} style={{ width: "100%", height: "100%", display: "block" }} alt=""></img>
+                                        <img src={this.props.photoLink} style={isModal_imgStyle as any} alt=""></img>
                                     </Box>
                                 </Modal>
                                 {this.props.isEdit === false ? (

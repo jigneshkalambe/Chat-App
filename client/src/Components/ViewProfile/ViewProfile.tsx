@@ -66,20 +66,7 @@ export class ViewProfile extends Component<viewProfileProps, viewProfileStates> 
             },
         }));
         const isOnline = this.props.onlineState.some((id) => (id as unknown) === this.props.userData._id);
-        const style = {
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "100%",
-            height: "100%",
-            maxWidth: "500px",
-            maxHeight: "500px",
-            boxShadow: 24,
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-        };
+
         return (
             <div className="ViewProfile">
                 <Stack alignItems={"center"}>
