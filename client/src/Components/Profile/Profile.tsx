@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./Profile.css";
-import { Avatar, Button, Stack, Typography } from "@mui/material";
+import { Avatar, Box, Button, Modal, Stack, Typography } from "@mui/material";
 
 interface formDataTypes {
     photoName: string;
@@ -13,6 +13,10 @@ interface formDataTypes {
     location: string;
     bio: string;
     subtitle: string;
+}
+
+interface profileStates {
+    open: boolean;
 }
 
 interface profileProps {
@@ -28,7 +32,13 @@ interface profileProps {
     photoLink: string;
 }
 
-export class Profile extends Component<profileProps> {
+export class Profile extends Component<profileProps, profileStates> {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            open: false,
+        };
+    }
     render() {
         const data = this.props.apiData;
         const currentData = data.currentAccount;
@@ -40,6 +50,25 @@ export class Profile extends Component<profileProps> {
         const display = {
             display: "block",
         };
+
+        const style = {
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "auto",
+            height: "auto",
+            maxHeight: "600px",
+            maxWidth: "70%",
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            borderRadius: 1,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            border: "none",
+        };
+
         return (
             <div className="outerLayout">
                 <form onSubmit={this.props.UpdateAccountHandler}>
@@ -48,9 +77,34 @@ export class Profile extends Component<profileProps> {
                         <div className="profilePhotoLine">
                             <div>
                                 <input id="fileInput" name="fileInput" type="file" accept="image/*" style={{ display: "none" }} onChange={this.props.handleFileChange} />
-                                <Button sx={{ borderRadius: "100%", pointerEvents: this.props.isEdit === false ? "none" : "auto", width: 100, height: 100 }} onClick={this.props.handleUploadClick}>
+                                <Button
+                                    sx={{ borderRadius: "100%", pointerEvents: "auto", width: 100, height: 100 }}
+                                    onClick={
+                                        this.props.isEdit === false
+                                            ? () => {
+                                                  this.setState({
+                                                      open: true,
+                                                  });
+                                              }
+                                            : this.props.handleUploadClick
+                                    }
+                                >
                                     <Avatar sx={{ width: 100, height: 100, border: "1px solid #ccc" }} src={this.props.photoLink} />
                                 </Button>
+                                <Modal
+                                    open={this.state.open}
+                                    onClose={() => {
+                                        this.setState({
+                                            open: false,
+                                        });
+                                    }}
+                                    aria-labelledby="modal-modal-title"
+                                    aria-describedby="modal-modal-description"
+                                >
+                                    <Box sx={style}>
+                                        <img src={this.props.photoLink} style={{ width: "100%", height: "100%", display: "block" }} alt=""></img>
+                                    </Box>
+                                </Modal>
                                 {this.props.isEdit === false ? (
                                     <Typography variant="subtitle1" component={"p"}>
                                         {currentData?.firstName + " " + currentData?.lastName}

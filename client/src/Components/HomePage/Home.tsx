@@ -261,7 +261,7 @@ export class Home extends Component<{}, homeState> {
                 const userId = localStorage.getItem("userId");
                 const apiAccounts = res.data.accounts;
                 const currentAccount = apiAccounts.find((acc: any) => acc._id === userId);
-                // console.log("CurrentAccount", currentAccount);
+                console.log("CurrentAccount", currentAccount);
                 if (currentAccount) {
                     this.setState(
                         {
@@ -311,21 +311,15 @@ export class Home extends Component<{}, homeState> {
     handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            const formData = new FormData();
-            formData.append("fileInput", file);
-
-            await axios
-                .post(`${process.env.REACT_APP_API_URL}/profile/upload`, formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                })
-                .then((res) => {
-                    console.log(res);
-                    this.setState({
-                        formData: { ...this.state.formData, photoName: res.data.filePath },
-                        photoLink: res.data.filePath,
-                    });
-                })
-                .catch((err) => console.log(err));
+            const publicUrl = await this.uploadFile(file, "Images");
+            if (publicUrl) {
+                this.setState({
+                    formData: { ...this.state.formData, photoName: publicUrl },
+                    photoLink: publicUrl,
+                });
+            }
+        } else {
+            console.log("No file selected");
         }
     };
 

@@ -118,7 +118,6 @@ export class ViewProfile extends Component<viewProfileProps, viewProfileStates> 
                         onClose={() => {
                             this.setState({ open: false });
                         }}
-                        sx={{ width: "auto" }}
                     >
                         <Box
                             // sx={style}

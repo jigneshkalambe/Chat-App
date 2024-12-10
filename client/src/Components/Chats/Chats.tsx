@@ -66,6 +66,7 @@ interface chatStates {
     isModal: boolean;
     windowWidth: number;
     isPickerVisible: boolean;
+    currentImg: string | undefined;
 }
 
 interface chatProps {
@@ -145,6 +146,7 @@ export class Chats extends Component<chatProps, chatStates> {
             isModal: false,
             windowWidth: window.innerWidth,
             isPickerVisible: false,
+            currentImg: "",
         };
     }
 
@@ -234,15 +236,26 @@ export class Chats extends Component<chatProps, chatStates> {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: "auto",
-            height: "auto",
-            maxHeight: "600px",
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            borderRadius: 5,
+            // width: this.state.windowWidth > 576 ? "auto" : "100%",
+            // height: this.state.windowWidth > 576 ? "100%" : "auto",
+            // maxHeight: "500px",
+            // maxWidth: "70%",
+            width: this.state.windowWidth > 576 ? "100%" : "80%",
+            height: this.state.windowWidth > 576 ? "100%" : "auto",
+            maxWidth: this.state.windowWidth > 576 ? "500px" : "90%",
+            maxHeight: this.state.windowWidth > 576 ? "500px" : "90%",
             display: "flex",
             flexDirection: "column",
-            gap: 2,
+            overflow: "hidden",
+            border: "none",
+            outline: "none",
+        };
+
+        const isModal_imgStyle = {
+            border: "none",
+            display: "block",
+            height: "100%",
+            ...(this.state.windowWidth > 576 && { objectFit: "contain" }),
         };
 
         const attach_modal_style = {
@@ -487,25 +500,12 @@ export class Chats extends Component<chatProps, chatStates> {
                                             onClick={() => {
                                                 this.setState({
                                                     isModal: true,
+                                                    currentImg: msg.Image,
                                                 });
                                             }}
                                             width={!msg.Image ? "0px" : this.state.windowWidth > 576 ? "300px" : "100%"}
                                             alt={""}
                                         ></img>
-                                        <Modal
-                                            open={this.state.isModal}
-                                            onClose={() => {
-                                                this.setState({
-                                                    isModal: false,
-                                                });
-                                            }}
-                                            aria-labelledby="modal-modal-title"
-                                            aria-describedby="modal-modal-description"
-                                        >
-                                            <Box sx={isModal_style}>
-                                                <img src={msg.Image} width={!msg.Image ? "0px" : this.state.windowWidth > 576 ? "300px" : "100%"} alt={""}></img>
-                                            </Box>
-                                        </Modal>
                                         {msg.audio ? (
                                             <audio controls>
                                                 <source src={msg.audio ? msg.audio : undefined} />
@@ -538,6 +538,23 @@ export class Chats extends Component<chatProps, chatStates> {
                                     </div>
                                 ))}
                             </div>
+                            <Modal
+                                open={this.state.isModal}
+                                onClose={() => {
+                                    this.setState({
+                                        isModal: false,
+                                    });
+                                }}
+                            >
+                                <Box sx={isModal_style}>
+                                    <img
+                                        style={isModal_imgStyle as any}
+                                        src={this.state.currentImg}
+                                        width={!this.state.currentImg ? "0px" : this.state.windowWidth > 576 ? "auto" : "100%"}
+                                        alt={this.state.currentImg}
+                                    ></img>
+                                </Box>
+                            </Modal>
                             <Modal open={this.props.isAttach} onClose={this.props.closeAttachModal}>
                                 <Box sx={attach_modal_style}>
                                     <Box style={{ height: "100%", objectFit: "contain", overflow: "hidden" }}>

@@ -15,7 +15,6 @@
     max-height: 500px;
     display: flex;
     flex-direction: column;
-    /* border-radius: 100%; */
     overflow: hidden;
 }
 
@@ -28,7 +27,7 @@
 @media (max-width: 576px) {
     .img_modal {
         max-width: 90%;
-        width: 100%;
+        width: 80%;
         height: auto;
         max-height: 90%;
     }

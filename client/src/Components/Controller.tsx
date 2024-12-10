@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { Component } from "react";
 import { Slide, toast } from "react-toastify";
+import { supabase } from "./supabaseClient";
 interface formDataTypes {
     photoName: string;
     firstName: string;
@@ -98,23 +99,45 @@ export class Controller extends Component<{}, ChatStates> {
         document.getElementById("fileInput")?.click();
     };
 
+    uploadFile = async (file: File, folder: string): Promise<string | null> => {
+        const bucketName = "Attach_files";
+        const fileName = `${folder}/${Date.now()}_${file.name}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage.from(bucketName).upload(fileName, file, {
+            cacheControl: "3600",
+            upsert: false,
+        });
+
+        if (uploadError) {
+            console.error(`Error uploading ${folder} file:`, uploadError.message);
+            return null;
+        }
+
+        const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(fileName);
+
+        if (!publicUrlData || !publicUrlData.publicUrl) {
+            console.error("Error: Unable to fetch public URL.");
+            return null;
+        }
+
+        const publicUrl = publicUrlData.publicUrl;
+        console.log(`${folder} uploaded successfully:`, publicUrl);
+
+        return publicUrl;
+    };
+
     handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            const formData = new FormData();
-            formData.append("fileInput", file);
-
-            await axios
-                .post(`${process.env.REACT_APP_API_URL}/profile/upload`, formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                })
-                .then((res) => {
-                    this.setState({
-                        formData: { ...this.state.formData, photoName: res.data.filePath },
-                        photoLink: res.data.filePath,
-                    });
-                })
-                .catch((err) => console.log(err));
+            const publicUrl = await this.uploadFile(file, "Images");
+            if (publicUrl) {
+                this.setState({
+                    formData: { ...this.state.formData, photoName: publicUrl },
+                    photoLink: publicUrl,
+                });
+            }
+        } else {
+            console.log("No file selected");
         }
     };
 
