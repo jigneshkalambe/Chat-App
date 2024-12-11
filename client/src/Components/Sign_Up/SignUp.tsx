@@ -30,7 +30,7 @@ export class SignUp extends Component<props> {
         return (
             <>
                 <Card className="SignUpCard">
-                    <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" transition={Slide} />
+                    {/* <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" transition={Slide} /> */}
                     <input id="fileInput" name="fileInput" type="file" accept="image/*" style={{ display: "none" }} onChange={this.props.handleFileChange} />
                     <Typography variant="h2" fontSize={30} fontWeight={500} textAlign={"center"}>
                         Sign Up

@@ -158,6 +158,15 @@ const CreateAccountSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        verified: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        verificationCode: {
+            type: Number,
+            required: false,
+        },
     },
     {
         timestamps: true,

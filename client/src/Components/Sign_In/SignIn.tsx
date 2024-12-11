@@ -36,7 +36,7 @@ export class SignIn extends Component<props> {
     render() {
         return (
             <Card className="MainCard">
-                <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" transition={Slide} />
+                {/* <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" transition={Slide} /> */}
                 <Typography variant="h2" fontSize={30} fontWeight={500} textAlign={"center"}>
                     Sign In
                 </Typography>

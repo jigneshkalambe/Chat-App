@@ -10,5 +10,6 @@ router.post("/updateAccount", AccountController.UpdateAccount);
 router.post("/findAccount", AccountController.FindAccount);
 router.post("/newUserList", AccountController.removeNewUserList);
 router.post("/msg", enforceSubscriptionLimits, AccountController.userAccountMsg);
+router.post("/verifyOtp", AccountController.verifyOTP);
 
 module.exports = router;

@@ -1,7 +1,8 @@
 const Accounts = require("../model/CreateAccountModel");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const SubscriptionModel = require("../model/SubscriptionModel");
+const nodemailer = require("nodemailer");
+const { OtpEmailTemplate, LoginOtpEmailTemplate } = require("../Template/EmailTemplates");
+require("dotenv").config();
 
 const CreateAccount = async (req, res) => {
     try {
@@ -20,6 +21,32 @@ const CreateAccount = async (req, res) => {
             return res.status(400).json({ message: "Email already exists" });
         }
 
+        const transport = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            auth: {
+                user: process.env.NODEMAILER_USER,
+                pass: process.env.NODEMAILER_PASS,
+            },
+        });
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        const htmlTemplate = OtpEmailTemplate.replace("{otp}", otp).replace("{firstName}", firstName);
+        const mail_sent = transport
+            .sendMail({
+                from: process.env.NODEMAILER_USER,
+                to: email,
+                subject: "Your One-Time Password (OTP)",
+                html: htmlTemplate,
+            })
+            .then(() => {
+                console.log("Email Sent Successfully!");
+            })
+            .catch((error) => {
+                throw new Error("Failed to send email:", error);
+            });
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const User = new Accounts({
             photoName,
@@ -30,9 +57,11 @@ const CreateAccount = async (req, res) => {
             gender,
             age,
             number,
+            verificationCode: otp,
         });
         await User.save();
-        res.status(201).json({ message: "Account created successfully", data: User });
+
+        res.status(201).json({ message: "Account created successfully. Please verify your email address using the OTP sent to your email.", data: User });
     } catch (errors) {
         return res.status(500).json({ errors: errors });
     }
@@ -66,7 +95,44 @@ const LoginAccount = async (req, res) => {
             throw new Error("The email or password you entered is incorrect");
         }
 
-        res.status(200).json({ message: "You have successfully logged in", currentUser });
+        if (!currentUser.verified) {
+            const transport = nodemailer.createTransport({
+                host: "smtp.gmail.com",
+                port: 587,
+                auth: {
+                    user: process.env.NODEMAILER_USER,
+                    pass: process.env.NODEMAILER_PASS,
+                },
+            });
+
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+            const htmlTemplate = LoginOtpEmailTemplate.replace("{otp}", otp).replace("{firstName}", currentUser.firstName);
+            const mail_sent = transport
+                .sendMail({
+                    from: process.env.NODEMAILER_USER,
+                    to: email,
+                    subject: "Your One-Time Password (OTP)",
+                    html: htmlTemplate,
+                })
+                .then(() => {
+                    console.log("Email Sent Successfully!");
+                })
+                .catch((error) => {
+                    console.log(error);
+                    throw new Error("Failed to send email:", error);
+                });
+
+            currentUser.verificationCode = otp;
+            await currentUser.save();
+            res.status(400).json({
+                message: "Your email is not verified. Please check your inbox for the OTP or contact support if you didn't receive it.",
+                verified: false,
+                currentUser,
+            });
+        } else {
+            res.status(200).json({ message: "You have successfully logged in", currentUser });
+        }
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
@@ -191,4 +257,24 @@ const userAccountMsg = async (req, res) => {
     }
 };
 
-module.exports = { CreateAccount, AccountList, LoginAccount, UpdateAccount, FindAccount, removeNewUserList, userAccountMsg };
+const verifyOTP = async (req, res) => {
+    try {
+        const { otp } = req.body;
+        const currentUser = await Accounts.findOne({ verificationCode: Number(otp) });
+        if (!currentUser) {
+            return res.status(404).json({ message: "OTP is invalid" });
+        }
+        if (currentUser.verificationCode !== Number(otp)) {
+            throw new Error("OTP is invalid");
+        } else {
+            currentUser.verified = true;
+            currentUser.verificationCode = undefined;
+            await currentUser.save();
+        }
+        res.status(200).json({ message: "OTP verified successfully!", currentUser });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { CreateAccount, AccountList, LoginAccount, UpdateAccount, FindAccount, removeNewUserList, userAccountMsg, verifyOTP };

@@ -165,8 +165,8 @@ export class Controller extends Component<{}, ChatStates> {
                 });
                 if (res.status === 200 || 201) {
                     setTimeout(() => {
-                        window.location.href = "/home";
-                    }, 2000);
+                        window.location.href = "/verifyEmail";
+                    }, 3000);
                 }
             })
             .catch((err) => {
@@ -233,6 +233,12 @@ export class Controller extends Component<{}, ChatStates> {
                     theme: "light",
                     transition: Slide,
                 });
+
+                if (err.status === 400) {
+                    setTimeout(() => {
+                        window.location.href = "/verifyEmail";
+                    }, 3000);
+                }
             });
     };
 }

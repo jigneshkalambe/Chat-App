@@ -864,7 +864,7 @@ export class Home extends Component<{}, homeState> {
         }
         return (
             <>
-                <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" transition={Slide} />
+                {/* <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" transition={Slide} /> */}
                 <div className="HomePage">
                     <Sidebar components={this.state.components} componentRender={this.componentRender} />
                     <HomeComponent>{componentRender}</HomeComponent>
