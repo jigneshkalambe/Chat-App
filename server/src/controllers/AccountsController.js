@@ -224,6 +224,7 @@ const removeNewUserList = async (req, res) => {
             const userList = currentAccount.newUserLists.find((user) => user.email === userData.email);
             if (userList) {
                 currentAccount.newUserLists = currentAccount.newUserLists.filter((user) => user.email !== userData.email);
+                currentAccount.friendRequestList = currentAccount.friendRequestList.filter((user) => user.email !== userData.email);
                 await currentAccount.save();
                 res.status(200).json({ message: "Account deleted successfully", currentAccount });
             } else {
@@ -277,4 +278,59 @@ const verifyOTP = async (req, res) => {
     }
 };
 
-module.exports = { CreateAccount, AccountList, LoginAccount, UpdateAccount, FindAccount, removeNewUserList, userAccountMsg, verifyOTP };
+const friendRequestList = async (req, res) => {
+    try {
+        const { from, to } = req.body;
+        console.log(req.body);
+        if (!from) {
+            console.log("Didnt received from");
+        }
+
+        if (!to) {
+            console.log("Didnt received to");
+        }
+
+        const friend = await Accounts.findOne({ _id: from });
+        const currentAccount = await Accounts.findOne({ _id: to });
+        if (!friend) {
+            return res.status(404).json({ message: "Friend not found" });
+        }
+
+        if (!currentAccount) {
+            return res.status(404).json({ message: "Current Account not found" });
+        }
+        currentAccount.friendRequestList.push(friend);
+        await currentAccount.save();
+        res.status(200).json({ message: "Got new friend request" });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const AddorRemoveFriendRequest = async (req, res) => {
+    try {
+        const { CurrentAccId, _id, text } = req.body;
+        const CurrentAccount = await Accounts.findOne({ _id: CurrentAccId });
+        const User = await Accounts.findOne({ _id });
+        console.log(User);
+        if (text === "Accept") {
+            CurrentAccount.newUserLists.push(User);
+            const Friend = CurrentAccount.friendRequestList.find((user) => user.email === User.email);
+            Friend.isFriend = true;
+            await CurrentAccount.save();
+            res.status(200).json({ message: "You have accepted request", CurrentAccount });
+        } else if ("Reject") {
+            const Friend = CurrentAccount.friendRequestList.find((user) => user.email === User.email);
+            Friend.isFriend = false;
+            CurrentAccount.friendRequestList = CurrentAccount.friendRequestList.filter((users) => users.email !== User.email);
+            await CurrentAccount.save();
+            res.status(400).json({ message: "You have rejected request", CurrentAccount });
+        } else {
+            console.log("Invalid Request");
+        }
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { CreateAccount, AccountList, LoginAccount, UpdateAccount, FindAccount, removeNewUserList, userAccountMsg, verifyOTP, friendRequestList, AddorRemoveFriendRequest };

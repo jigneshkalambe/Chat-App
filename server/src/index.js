@@ -61,13 +61,25 @@ io.on("connection", (socket) => {
         io.emit("onlineUsers", Object.keys(usersInRooms));
     });
 
-    socket.on("privateMessage", ({ toUserId, message, senderId, time, Image, audio, video }) => {
+    socket.on("privateMessage", ({ toUserId, message, senderId, time, Image, audio, video, docpdf }) => {
         const recipientSocketId = usersInRooms[toUserId];
         if (recipientSocketId) {
-            io.to(recipientSocketId).emit("privateMessage", { toUserId, message, senderId, time, Image, audio, video });
+            io.to(recipientSocketId).emit("privateMessage", { toUserId, message, senderId, time, Image, audio, video, docpdf });
         } else {
             console.log(`User ${toUserId} not connected`);
             socket.emit("userNotAvailable", { message: "User is offline", senderId });
+        }
+    });
+
+    socket.on("friend_request", async ({ data }) => {
+        console.log(data.to);
+        const recipientId = usersInRooms[data.to];
+        console.log(recipientId);
+        if (recipientId) {
+            io.to(recipientId).emit("friend_request", { from: data.from, to: data.to });
+        } else {
+            console.log(`Didnt received ${data}`);
+            socket.emit("did not able to send request");
         }
     });
 

@@ -4,6 +4,7 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import ExitToAppOutlinedIcon from "@mui/icons-material/ExitToAppOutlined";
 import CurrencyRupeeOutlinedIcon from "@mui/icons-material/CurrencyRupeeOutlined";
+import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
 import "./Sidebar.css";
 import { Typography } from "@mui/material";
 
@@ -25,7 +26,9 @@ export class Sidebar extends Component<sidebarProps, {}> {
                         <QuestionAnswerOutlinedIcon />
                     </div>
                     <div className="header_text">
-                        <Typography variant="body1">Chat App</Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                            Chat App
+                        </Typography>
                     </div>
                 </div>
                 <div className="Sidebar_Body">
@@ -35,7 +38,9 @@ export class Sidebar extends Component<sidebarProps, {}> {
                                 <PersonOutlinedIcon />
                             </div>
                             <div className="header_text">
-                                <Typography variant="body1">Profile</Typography>
+                                <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                    Profile
+                                </Typography>
                             </div>
                         </div>
 
@@ -44,7 +49,9 @@ export class Sidebar extends Component<sidebarProps, {}> {
                                 <SendOutlinedIcon />
                             </div>
                             <div className="header_text">
-                                <Typography variant="body1">Chats</Typography>
+                                <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                    Chats
+                                </Typography>
                             </div>
                         </div>
 
@@ -53,7 +60,20 @@ export class Sidebar extends Component<sidebarProps, {}> {
                                 <CurrencyRupeeOutlinedIcon />
                             </div>
                             <div className="header_text">
-                                <Typography variant="body1">Subscription</Typography>
+                                <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                    Subscription
+                                </Typography>
+                            </div>
+                        </div>
+
+                        <div className={`Sidebar_section ${this.props.components === "UserRequest" ? "activeComponent" : ""}`} onClick={() => this.handlerComponent("UserRequest")}>
+                            <div className="header_icon">
+                                <PersonAddAltOutlinedIcon />
+                            </div>
+                            <div className="header_text">
+                                <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                    User Request
+                                </Typography>
                             </div>
                         </div>
                     </div>
@@ -69,7 +89,9 @@ export class Sidebar extends Component<sidebarProps, {}> {
                                 <ExitToAppOutlinedIcon />
                             </div>
                             <div className="header_signout">
-                                <Typography variant="body1">Sign Out</Typography>
+                                <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                    Sign Out
+                                </Typography>
                             </div>
                         </button>
                     </div>

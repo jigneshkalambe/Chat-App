@@ -19,17 +19,18 @@ const messageSchema = new mongoose.Schema({
     Image: {
         type: String,
         required: false,
-        // trim: true,
     },
     audio: {
         type: String,
         required: false,
-        // trim: true,
     },
     video: {
         type: String,
         required: false,
-        // trim: true,
+    },
+    docpdf: {
+        type: String,
+        required: false,
     },
 });
 
@@ -86,6 +87,67 @@ const newUserListsSchema = new mongoose.Schema({
         required: false,
         trim: true,
         default: "",
+    },
+});
+
+const newFriendRequest = new mongoose.Schema({
+    photoName: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    firstName: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    lastName: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    email: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    gender: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    age: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    number: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    location: {
+        type: String,
+        required: false,
+        trim: true,
+        default: "",
+    },
+    subtitle: {
+        type: String,
+        required: false,
+        trim: true,
+        default: "",
+    },
+    bio: {
+        type: String,
+        required: false,
+        trim: true,
+        default: "",
+    },
+    isFriend: {
+        type: Boolean,
+        required: false,
+        default: false,
     },
 });
 
@@ -167,6 +229,7 @@ const CreateAccountSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
+        friendRequestList: [newFriendRequest],
     },
     {
         timestamps: true,

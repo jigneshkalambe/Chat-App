@@ -10,6 +10,7 @@ import { io, Socket } from "socket.io-client";
 import { supabase } from "../supabaseClient";
 import { load } from "@cashfreepayments/cashfree-js";
 import Subscription from "../Subscription/Subscription";
+import FriendRequestPage from "../FriendRequests/FriendRequestPage";
 
 interface formDataTypes {
     photoName: string;
@@ -38,6 +39,21 @@ interface userData {
     subtitle: string;
 }
 
+interface friendDataKey {
+    _id: string;
+    photoName: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    gender: string;
+    age: string;
+    number: string;
+    location: string;
+    bio: string;
+    subtitle: string;
+    isFriend: boolean;
+}
+
 interface data {
     Author: string;
     messages: string;
@@ -45,6 +61,12 @@ interface data {
     Image?: string;
     audio?: string;
     video?: string;
+    docpdf?: string;
+}
+
+interface friendData {
+    from: string | null;
+    to: string | null;
 }
 
 interface joinRoomData {
@@ -78,11 +100,16 @@ interface homeState {
     Img: Img;
     AudioURL: string;
     VideoURL: string;
+    DocPdfURL: string;
     isAttach: boolean;
     LinksForModal: LinksForModalTypes;
     cashfree: any;
     orderId: string;
     paymentSuccessfully: boolean;
+    friendData: friendData;
+    friendRequestList: friendDataKey[];
+    friendRequestListCount: number;
+    activeUserId: string;
 }
 export class Home extends Component<{}, homeState> {
     private autoScroll: React.RefObject<HTMLDivElement>;
@@ -113,6 +140,7 @@ export class Home extends Component<{}, homeState> {
                 Image: "",
                 audio: "",
                 video: "",
+                docpdf: "",
                 time: new Date(Date.now()).toLocaleTimeString(),
             },
             joinRoomData: {
@@ -149,6 +177,14 @@ export class Home extends Component<{}, homeState> {
             cashfree: "",
             orderId: "",
             paymentSuccessfully: false,
+            DocPdfURL: "",
+            friendData: {
+                from: "",
+                to: "",
+            },
+            friendRequestList: [],
+            activeUserId: "",
+            friendRequestListCount: 0,
         };
         this.socket = io("https://chat-app-qu8l.onrender.com/");
         this.autoScroll = React.createRef();
@@ -170,8 +206,8 @@ export class Home extends Component<{}, homeState> {
         this.socket.on("privateMessage", (data: any) => {
             console.log(`Private message from ${data.senderId}: ${data.message}`);
             console.log("privateMessage:Data", data);
-            const { senderId, message, time, Image, audio, video } = data;
-            if (message || Image || audio || video) {
+            const { senderId, message, time, Image, audio, video, docpdf } = data;
+            if (message || Image || audio || video || docpdf) {
                 console.log("Got Message From user", message);
                 const notification = new Audio("/sound/chat-notification.mp3");
                 notification.play();
@@ -189,6 +225,7 @@ export class Home extends Component<{}, homeState> {
                                 Image: Image,
                                 audio: audio,
                                 video: video,
+                                docpdf: docpdf,
                             },
                         ],
                     },
@@ -218,6 +255,33 @@ export class Home extends Component<{}, homeState> {
             }));
         });
 
+        this.socket.on("friend_request", async (data) => {
+            console.log(data);
+            if (data) {
+                await axios
+                    .post(`${process.env.REACT_APP_API_URL}/account/newFriendRequest`, { from: data.from, to: data.to })
+                    .then((res) => {
+                        console.log(res);
+                        if (res.status === 200) {
+                            this.currentAccount();
+                        }
+                        toast.warning(res.data.message, {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            theme: "light",
+                            transition: Slide,
+                        });
+                    })
+                    .catch((err) => console.log(err));
+            } else {
+                return;
+            }
+        });
+
         this.socket.on("onlineUsers", (online) => {
             // console.log("Online Users", online);
             this.setState({ onlineState: online });
@@ -240,7 +304,6 @@ export class Home extends Component<{}, homeState> {
     componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<homeState>, snapshot?: any): void {
         if (prevState.messages !== this.state.messages) {
             this.scrollToBottom();
-            // this.premiumChatHandler();
         }
 
         if (this.state.formData.email && this.state.formData.email !== prevState.formData.email) {
@@ -285,6 +348,7 @@ export class Home extends Component<{}, homeState> {
                             userData: currentAccount?.newUserLists,
                             messages: currentAccount?.messages || {},
                             paymentSuccessfully: currentAccount?.paymentSuccessfully,
+                            friendRequestList: currentAccount?.friendRequestList,
                         },
                         () => {
                             this.checkSubscriptionStatus();
@@ -423,6 +487,27 @@ export class Home extends Component<{}, homeState> {
         }
     };
 
+    sendDocPdfHandler = () => {
+        document.getElementById("fileInput_docpdf")?.click();
+    };
+
+    sendDocPdfChangeHandler = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const publicUrl = await this.uploadFile(file, "DocPdf");
+            if (publicUrl) {
+                console.log("Doc / Pdf uploaded successfully:", publicUrl);
+                this.setState({
+                    DocPdfURL: publicUrl,
+                    LinksForModal: {
+                        linkTag: "doc/pdf",
+                        link: publicUrl,
+                    },
+                });
+            }
+        }
+    };
+
     getUpdateData = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         this.setState({
             formData: {
@@ -483,25 +568,26 @@ export class Home extends Component<{}, homeState> {
         await axios
             .post(`${process.env.REACT_APP_API_URL}/account/findAccount`, { currentAccEmail: this.state.formData.email, email: value.username, number: value.room })
             .then((res) => {
+                console.log(res);
                 const apiData = res.data.user;
-                const exitsUser = this.state.userData.find((user) => {
-                    return user.email === apiData.email && user.number === apiData.number;
-                });
+                // console.log("userData", this.state.userData);
+                const exitsUser = this.state.userData.findIndex((user) => user._id === res.data.user._id);
+                // console.log("roomhandler", exitsUser);
+                // console.log("apiData", apiData);
                 this.currentAccount();
-                if (exitsUser) {
-                    toast.error("User already exists", {
-                        position: "top-right",
-                        autoClose: 5000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        theme: "light",
-                        transition: Slide,
-                    });
-                    return;
-                } else {
+                if (exitsUser === -1) {
                     localStorage.setItem("toUserId", res.data.user?._id);
+                    this.setState(
+                        {
+                            friendData: {
+                                from: localStorage.getItem("userId"),
+                                to: res.data.user._id,
+                            },
+                        },
+                        () => {
+                            this.socket.emit("friend_request", { data: this.state.friendData });
+                        }
+                    );
                     this.currentAccount();
                     toast.success(res.data.message, {
                         position: "top-right",
@@ -540,6 +626,7 @@ export class Home extends Component<{}, homeState> {
             Image: this.state.Img.url,
             audio: this.state.AudioURL,
             video: this.state.VideoURL,
+            docpdf: this.state.DocPdfURL,
             time: new Date().toLocaleTimeString(),
         };
 
@@ -568,6 +655,7 @@ export class Home extends Component<{}, homeState> {
                         Image: this.state.Img.url,
                         audio: this.state.AudioURL,
                         video: this.state.VideoURL,
+                        docpdf: this.state.DocPdfURL,
                         time: new Date().toLocaleTimeString(),
                     });
 
@@ -591,6 +679,7 @@ export class Home extends Component<{}, homeState> {
                         },
                         VideoURL: "",
                         AudioURL: "",
+                        DocPdfURL: "",
                         isAttach: false,
                         LinksForModal: {
                             link: "",
@@ -815,6 +904,20 @@ export class Home extends Component<{}, homeState> {
         }
     };
 
+    navigateToChats = (user: any) => {
+        this.setState({
+            components: "Chats",
+            selectedUser: user,
+            activeUserId: user._id,
+        });
+    };
+
+    activeUserIdFn = (Id: string) => {
+        this.setState({
+            activeUserId: Id,
+        });
+    };
+
     render() {
         const { components } = this.state;
         let componentRender: JSX.Element | null = null;
@@ -853,14 +956,22 @@ export class Home extends Component<{}, homeState> {
                     sendVideoChangeHandler={this.sendVideoChangeHandler}
                     sendAudioHandler={this.sendAudioHandler}
                     sendAudioChangeHandler={this.sendAudioChangeHandler}
+                    sendDocPdfHandler={this.sendDocPdfHandler}
+                    sendDocPdfChangeHandler={this.sendDocPdfChangeHandler}
                     Img={this.state.Img}
                     isAttach={this.state.isAttach}
                     closeAttachModal={this.closeAttachModal}
                     LinksForModal={this.state.LinksForModal}
+                    activeUserId={this.state.activeUserId}
+                    activeUserIdFn={this.activeUserIdFn}
                 />
             );
         } else if (components === "Subscriptions") {
             componentRender = <Subscription subscriptionsHandler={this.subscriptionsHandler} />;
+        } else if (components === "UserRequest") {
+            componentRender = (
+                <FriendRequestPage friendData={this.state.friendData} friendRequestList={this.state.friendRequestList} currentAccountFn={this.currentAccount} navigateToChat={this.navigateToChats} />
+            );
         }
         return (
             <>

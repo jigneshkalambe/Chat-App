@@ -12,6 +12,7 @@ import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import AudioFileIcon from "@mui/icons-material/AudioFile";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined";
+import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 interface joinRoomData {
     username: string;
     room: string;
@@ -24,6 +25,7 @@ interface data {
     Image?: string;
     audio?: string;
     video?: string;
+    docpdf?: string;
 }
 
 interface userData {
@@ -59,7 +61,6 @@ interface chatStates {
     roomData: joinRoomData;
     isTyping: boolean;
     currentAuthor: string;
-    activeUserId: string;
     searchedUser: string;
     IsviewModal: boolean;
     isAttachOpen: boolean;
@@ -84,13 +85,17 @@ interface chatProps {
     sendImageHandler: () => void;
     sendVideoHandler: () => void;
     sendAudioHandler: () => void;
+    sendDocPdfHandler: () => void;
     sendImageChangeHandler: (event: React.ChangeEvent<HTMLInputElement>) => void;
     sendVideoChangeHandler: (event: React.ChangeEvent<HTMLInputElement>) => void;
     sendAudioChangeHandler: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    sendDocPdfChangeHandler: (event: React.ChangeEvent<HTMLInputElement>) => void;
     Img: Img;
     isAttach: boolean;
     closeAttachModal: () => void;
     LinksForModal: LinksForModalTypes;
+    activeUserIdFn: (Id: string) => void;
+    activeUserId: string;
 }
 
 interface FadeProps {
@@ -139,7 +144,6 @@ export class Chats extends Component<chatProps, chatStates> {
             },
             isTyping: false,
             currentAuthor: "",
-            activeUserId: "",
             searchedUser: "",
             IsviewModal: false,
             isAttachOpen: true,
@@ -309,18 +313,16 @@ export class Chats extends Component<chatProps, chatStates> {
                                 return (
                                     <div
                                         key={ind}
-                                        className={this.state.activeUserId === val._id ? "active-user" : ""}
+                                        className={this.props.activeUserId === val._id ? "active-user" : ""}
                                         onClick={() => {
-                                            this.setState({
-                                                activeUserId: val._id,
-                                            });
+                                            this.props.activeUserIdFn(val._id);
                                         }}
                                     >
                                         <Users
                                             selectUserHandler={this.props.selectUserHandler}
                                             deleteNewUserList={this.props.deleteNewUserList}
                                             user={val}
-                                            activeUserId={this.state.activeUserId}
+                                            activeUserId={this.props.activeUserId}
                                             onlineState={this.props.onlineState}
                                         />
                                         <Divider />
@@ -514,6 +516,12 @@ export class Chats extends Component<chatProps, chatStates> {
                                         >
                                             <source src={msg.video} type="video/mp4" />
                                         </video>
+                                        <iframe
+                                            title={"doc/pdf"}
+                                            width={!msg.docpdf ? "0px" : this.state.windowWidth > 576 ? "300px" : "100%"}
+                                            height={!msg.docpdf ? "0px" : "auto"}
+                                            src={msg.docpdf}
+                                        ></iframe>
                                         <div ref={this.props.autoDiv}></div>
                                         <span
                                             style={{
@@ -564,6 +572,8 @@ export class Chats extends Component<chatProps, chatStates> {
                                             <audio controls>
                                                 <source src={this.props.LinksForModal.link} />
                                             </audio>
+                                        ) : this.props.LinksForModal.linkTag === "doc/pdf" ? (
+                                            <iframe title={"doc/pdf"} width={"100%"} height={"100%"} src={this.props.LinksForModal.link}></iframe>
                                         ) : null}
                                     </Box>
                                     <Stack direction={"row"} justifyContent={"flex-end"} alignItems={"center"} style={{ minHeight: "70px", padding: "0px 20px" }} gap={"20px"}>
@@ -614,6 +624,14 @@ export class Chats extends Component<chatProps, chatStates> {
                                     <input id="fileInput_image" name="fileInput_image" type="file" accept="image/*" style={{ display: "none" }} onChange={this.props.sendImageChangeHandler} />
                                     <input id="fileInput_video" name="fileInput_video" type="file" accept="video/*" style={{ display: "none" }} onChange={this.props.sendVideoChangeHandler} />
                                     <input id="fileInput_audio" name="fileInput_audio" type="file" accept="audio/*" style={{ display: "none" }} onChange={this.props.sendAudioChangeHandler} />
+                                    <input
+                                        id="fileInput_docpdf"
+                                        name="fileInput_docpdf"
+                                        type="file"
+                                        accept=".doc, .docx, .pdf"
+                                        style={{ display: "none" }}
+                                        onChange={this.props.sendDocPdfChangeHandler}
+                                    />
                                     {this.state.isAttachOpen === false ? (
                                         <div className="attachFile">
                                             <Tooltip title="Upload a image" placement="top">
@@ -641,6 +659,15 @@ export class Chats extends Component<chatProps, chatStates> {
                                                     sx={{ borderRadius: "100%", width: 45, height: 45, minWidth: 0, color: "orange", border: "1px solid orange" }}
                                                 >
                                                     <AudioFileIcon />
+                                                </Button>
+                                            </Tooltip>
+                                            <Tooltip title="Upload a Doc / pdf" placement="top">
+                                                <Button
+                                                    onClick={this.props.sendDocPdfHandler}
+                                                    variant="outlined"
+                                                    sx={{ borderRadius: "100%", width: 45, height: 45, minWidth: 0, color: "black", border: "1px solid black" }}
+                                                >
+                                                    <InsertDriveFileOutlinedIcon />
                                                 </Button>
                                             </Tooltip>
                                         </div>

@@ -63,7 +63,7 @@ const OtpEmailTemplate = `<!DOCTYPE html>
 
         <p>If you did not request this verification, please ignore this email or contact our support team if you have any concerns.</p>
 
-        <p>Best regards,<br>Your Application Team</p>
+        <p>Best regards,<br>Chatly</p>
 
         <div class="footer">
             <p>This is an automated message. Please do not reply to this email.</p>
@@ -137,7 +137,7 @@ const LoginOtpEmailTemplate = `<!DOCTYPE html>
 
         <p>If you didn't request this login, no worries! Just ignore this email or reach out to our support team if you have any concerns.</p>
 
-        <p>Cheers,<br>Your Friendly Application Team</p>
+        <p>Cheers,<br>Your Friendly Chatly.</p>
 
         <div class="footer">
             <p>This is an automated message to keep your account secure. Enjoy!</p>

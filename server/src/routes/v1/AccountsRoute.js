@@ -11,5 +11,7 @@ router.post("/findAccount", AccountController.FindAccount);
 router.post("/newUserList", AccountController.removeNewUserList);
 router.post("/msg", enforceSubscriptionLimits, AccountController.userAccountMsg);
 router.post("/verifyOtp", AccountController.verifyOTP);
+router.post("/newFriendRequest", AccountController.friendRequestList);
+router.post("/isAcceptRequest", AccountController.AddorRemoveFriendRequest);
 
 module.exports = router;

@@ -1,0 +1,7 @@
+.UserRequestBox {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 15px 0px;
+    align-items: center;
+    height: auto;
+}
