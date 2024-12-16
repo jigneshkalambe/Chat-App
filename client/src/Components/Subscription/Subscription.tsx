@@ -11,12 +11,12 @@ export class Subscription extends Component<SubscriptionProps> {
     render() {
         return (
             <div className="SubscriptionBox">
-                <Box sx={{ width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                <Box sx={{ width: "100%", height: "100%", maxHeight: "200px", display: "flex", justifyContent: "center", alignItems: "center" }}>
                     <Typography variant="h3" sx={{ color: "black" }}>
                         Choose Your Chat Service Plan
                     </Typography>
                 </Box>
-                <div className="row g-3">
+                <div className="row g-3 h-100">
                     <div className="col-lg-4 col-md-6 col-sm-12 px-2">
                         <Card className="CardHeight">
                             <CardContent>

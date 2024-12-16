@@ -13,6 +13,11 @@ import AudioFileIcon from "@mui/icons-material/AudioFile";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import SendRoundedIcon from "@mui/icons-material/SendRounded";
+import DocIcon from "../../Images/doc.png";
+import PdfIcon from "../../Images/pdf.png";
+
 interface joinRoomData {
     username: string;
     room: string;
@@ -258,22 +263,19 @@ export class Chats extends Component<chatProps, chatStates> {
             objectFit: "contain",
         };
 
-        const attach_modal_style = {
+        const attachFilesBox = {
+            width: "auto",
+            maxWidth: "90%",
+            height: this.props.LinksForModal.linkTag === "audio" ? "auto" : "200px",
+            maxHeight: "200px",
             position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "100%",
-            maxWidth: "fit-content",
-            height: this.props.LinksForModal.linkTag === "video" || this.props.LinksForModal.linkTag === "audio" ? "auto !important" : "100% !important",
-            maxHeight: "400px",
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            borderRadius: 5,
-            display: "flex",
-            flexDirection: "column",
-            objectFit: "contain",
-            overflow: "hidden",
+            bottom: "90px",
+            left: "6px",
+            backgroundColor: " rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(2px)",
+            border: "1px solid #ccc",
+            borderRadius: "10px",
+            display: this.props.isAttach ? "block" : "none",
         };
 
         const renderMap =
@@ -391,7 +393,7 @@ export class Chats extends Component<chatProps, chatStates> {
                         </div>
                     </div>
                 </div>
-                <div className={`col-xl-9 col-lg-8 col-md-12 col-12 d-flex align-items-center justify-content-center ${isSelected ? "h-100" : ""}`}>
+                <div className={`col-xl-9 col-lg-8 col-md-12 col-12 d-flex align-items-center justify-content-center bg-white ${isSelected ? "h-100" : ""}`}>
                     {Object.values(this.props.selectedUser).every((value) => value === "") ? (
                         "No Converstion or Messages"
                     ) : (
@@ -424,20 +426,6 @@ export class Chats extends Component<chatProps, chatStates> {
                                         </Stack>
                                     </div>
                                 </Tooltip>
-                                {/* <div>
-                                    <Button
-                                        onClick={() => {
-                                            this.setState({
-                                                IsviewModal: true,
-                                            });
-                                        }}
-                                        variant="contained"
-                                        sx={{ textTransform: "capitalize", fontSize: "16px", borderRadius: "20px", height: "45px", backgroundColor: "#2196F3" }}
-                                    >
-                                        View Profile
-                                    </Button>
-                                </div> */}
-
                                 <Modal
                                     aria-labelledby="spring-modal-title"
                                     aria-describedby="spring-modal-description"
@@ -477,6 +465,7 @@ export class Chats extends Component<chatProps, chatStates> {
                                             borderRadius: "10px",
                                             display: "flex",
                                             flexWrap: "wrap",
+                                            flexDirection: "column",
                                         }}
                                     >
                                         <span
@@ -516,24 +505,62 @@ export class Chats extends Component<chatProps, chatStates> {
                                         >
                                             <source src={msg.video} type="video/mp4" />
                                         </video>
-                                        <iframe
-                                            title={"doc/pdf"}
-                                            width={!msg.docpdf ? "0px" : this.state.windowWidth > 576 ? "300px" : "100%"}
-                                            height={!msg.docpdf ? "0px" : "auto"}
-                                            src={msg.docpdf}
-                                        ></iframe>
+                                        {msg.docpdf ? (
+                                            <a
+                                                href={msg.docpdf}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{
+                                                    width: !msg.docpdf ? "0px" : "100%",
+                                                    maxWidth: "300px",
+                                                    height: !msg.docpdf ? "0px" : "auto",
+                                                    backgroundColor: msg.Author === this.props.selectedUser._id ? "#FAF3E0" : "#2196F3",
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    alignItems: "center",
+                                                    padding: "8px",
+                                                    textDecoration: "none",
+                                                    boxSizing: "border-box",
+                                                    flexDirection: this.state.windowWidth > 576 ? "row" : "column",
+                                                    gap: this.state.windowWidth > 576 ? "0px" : "10px",
+                                                }}
+                                            >
+                                                <Box sx={{ width: 100, height: 80, display: "block", marginRight: 1 }}>
+                                                    <img
+                                                        width={"100%"}
+                                                        height={"100%"}
+                                                        alt=""
+                                                        src={
+                                                            msg.docpdf?.split(".").pop()?.toLowerCase() === "pdf"
+                                                                ? PdfIcon
+                                                                : msg.docpdf?.split(".").pop()?.toLowerCase() === "doc" || "docx"
+                                                                ? DocIcon
+                                                                : ""
+                                                        }
+                                                    ></img>
+                                                </Box>
+                                                <Box sx={{ width: "100%" }}>
+                                                    <Typography
+                                                        variant="subtitle1"
+                                                        component={"p"}
+                                                        sx={{ color: msg.Author === this.props.selectedUser._id ? "#000" : "#fff", fontSize: "15px", fontWeight: 600, wordBreak: "break-all" }}
+                                                    >
+                                                        {msg.docpdf ? msg.docpdf.split("/").pop()?.split(".").slice(0, -1).join(".") : "No File Name"}
+                                                    </Typography>
+                                                </Box>
+                                            </a>
+                                        ) : (
+                                            ""
+                                        )}
                                         <div ref={this.props.autoDiv}></div>
                                         <span
                                             style={{
                                                 width: "auto",
-                                                // display: "inline-block",
                                                 fontSize: "11px",
                                                 color: msg.Author === this.props.selectedUser._id ? "black" : "white",
                                                 whiteSpace: "nowrap",
-                                                // clear: "both",
-                                                // float: "right",
                                                 display: "flex",
-                                                margin: "8px 0px 0px 8px",
+                                                margin: "8px 0px 0px 0px",
                                                 alignItems: "flex-end",
                                             }}
                                         >
@@ -559,39 +586,65 @@ export class Chats extends Component<chatProps, chatStates> {
                                     ></img>
                                 </Box>
                             </Modal>
-                            <Modal open={this.props.isAttach} onClose={this.props.closeAttachModal}>
-                                <Box sx={attach_modal_style}>
-                                    <Box style={{ height: "100%", objectFit: "contain", overflow: "hidden" }}>
-                                        {this.props.LinksForModal.linkTag === "image" ? (
-                                            <img style={{ width: "100%", height: "100%", display: "block", objectFit: "cover" }} src={this.props.LinksForModal.link} alt=""></img>
-                                        ) : this.props.LinksForModal.linkTag === "video" ? (
-                                            <video width={"400px"} height={"auto"} controls>
-                                                <source src={this.props.LinksForModal.link} />
-                                            </video>
-                                        ) : this.props.LinksForModal.linkTag === "audio" ? (
-                                            <audio controls>
-                                                <source src={this.props.LinksForModal.link} />
-                                            </audio>
-                                        ) : this.props.LinksForModal.linkTag === "doc/pdf" ? (
-                                            <iframe title={"doc/pdf"} width={"100%"} height={"100%"} src={this.props.LinksForModal.link}></iframe>
-                                        ) : null}
-                                    </Box>
-                                    <Stack direction={"row"} justifyContent={"flex-end"} alignItems={"center"} style={{ minHeight: "70px", padding: "0px 20px" }} gap={"20px"}>
-                                        <Button
-                                            onClick={this.props.closeAttachModal}
-                                            variant="outlined"
-                                            style={{ width: "100%", color: "black", border: "1px solid black", textTransform: "capitalize" }}
-                                        >
-                                            Close
-                                        </Button>
-                                        <Button onClick={this.attachFilesSend} variant="contained" style={{ width: "100%", textTransform: "capitalize" }}>
-                                            Send
-                                        </Button>
-                                    </Stack>
-                                </Box>
-                            </Modal>
                             <form onSubmit={this.chatMsg}>
                                 <div className="chat_footer">
+                                    <Box sx={attachFilesBox}>
+                                        <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
+                                            <Button
+                                                variant="contained"
+                                                sx={{
+                                                    position: "absolute",
+                                                    borderRadius: "100%",
+                                                    minWidth: 0,
+                                                    width: 30,
+                                                    height: 30,
+                                                    backgroundColor: "red",
+                                                    color: "white",
+                                                    border: "1px solid white",
+                                                    right: "-10px",
+                                                    top: "-12px",
+                                                    padding: 0,
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    alignItems: "center",
+                                                }}
+                                                onClick={this.props.closeAttachModal}
+                                            >
+                                                <CloseOutlinedIcon />
+                                            </Button>
+                                            {this.props.LinksForModal.linkTag === "image" ? (
+                                                <img style={{ width: "100%", height: "100%", display: "block", objectFit: "contain" }} src={this.props.LinksForModal.link} alt=""></img>
+                                            ) : this.props.LinksForModal.linkTag === "video" ? (
+                                                <video width={"100%"} height={"100%"} controls>
+                                                    <source src={this.props.LinksForModal.link} />
+                                                </video>
+                                            ) : this.props.LinksForModal.linkTag === "audio" ? (
+                                                <audio controls>
+                                                    <source src={this.props.LinksForModal.link} />
+                                                </audio>
+                                            ) : this.props.LinksForModal.linkTag === "doc/pdf" ? (
+                                                <iframe title={"doc/pdf"} width={"100%"} height={"100%"} src={this.props.LinksForModal.link}></iframe>
+                                            ) : null}
+                                            <Button
+                                                variant="contained"
+                                                sx={{
+                                                    position: "absolute",
+                                                    borderRadius: "100%",
+                                                    minWidth: 0,
+                                                    width: 35,
+                                                    height: 35,
+                                                    backgroundColor: "#2196f3",
+                                                    color: "white",
+                                                    border: "1px solid white",
+                                                    bottom: "-10px",
+                                                    right: "-8px",
+                                                }}
+                                                onClick={this.attachFilesSend}
+                                            >
+                                                <SendRoundedIcon />
+                                            </Button>
+                                        </Box>
+                                    </Box>
                                     <div className="EmojiDiv">
                                         <Button onClick={this.toggleEmojiPicker} variant="text" sx={{ borderRadius: "100%", width: "45px", height: "45px", minWidth: "45px", color: "rgb(59,68,75)" }}>
                                             <EmojiEmotionsOutlinedIcon />
@@ -618,7 +671,7 @@ export class Chats extends Component<chatProps, chatStates> {
                                                 this.setState({ isTyping: false });
                                             }, 1000);
                                         }}
-                                        placeholder="Send Meassages"
+                                        placeholder="Send Massages"
                                         type="text"
                                     ></input>
                                     <input id="fileInput_image" name="fileInput_image" type="file" accept="image/*" style={{ display: "none" }} onChange={this.props.sendImageChangeHandler} />
