@@ -4,7 +4,6 @@ import "./SignIn.css";
 import HocInput from "../HocInput";
 import "./SignIn.css";
 import { Slide, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 interface formDataTypes {
     firstName: string;

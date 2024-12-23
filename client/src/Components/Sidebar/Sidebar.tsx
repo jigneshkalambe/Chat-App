@@ -11,6 +11,7 @@ import { Typography } from "@mui/material";
 interface sidebarProps {
     componentRender: (val: string) => void;
     components: string;
+    friendRequestListCount: number;
 }
 
 export class Sidebar extends Component<sidebarProps, {}> {
@@ -75,6 +76,7 @@ export class Sidebar extends Component<sidebarProps, {}> {
                                     User Request
                                 </Typography>
                             </div>
+                            {this.props.friendRequestListCount === 0 ? "" : <span className="count">{this.props.friendRequestListCount}</span>}
                         </div>
                     </div>
                     <div className="d-flex justify-content-center align-item">

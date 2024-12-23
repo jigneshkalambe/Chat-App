@@ -19,7 +19,7 @@ const enforceSubscriptionLimits = async (req, res, next) => {
         }
 
         if (subscription.messageLimit !== null && subscription.messagesSent >= subscription.messageLimit) {
-            return res.status(403).json({ message: "Message limit exceeded" });
+            return res.status(403).json({ message: "Message limit exceeded. Please consider upgrading your chat service package to continue." });
         }
 
         req.subscription = subscription;

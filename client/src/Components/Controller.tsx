@@ -154,7 +154,7 @@ export class Controller extends Component<{}, ChatStates> {
                 localStorage.setItem("userId", res.data.data._id);
 
                 toast.success(res.data.message, {
-                    position: "top-right",
+                    position: "bottom-center",
                     autoClose: 5000,
                     hideProgressBar: false,
                     closeOnClick: true,
@@ -172,7 +172,7 @@ export class Controller extends Component<{}, ChatStates> {
             .catch((err) => {
                 console.log(err.response);
                 toast.error(err.response.data.message, {
-                    position: "top-right",
+                    position: "bottom-center",
                     autoClose: 5000,
                     hideProgressBar: false,
                     closeOnClick: true,
@@ -204,7 +204,7 @@ export class Controller extends Component<{}, ChatStates> {
                 console.log(res);
                 localStorage.setItem("userId", res.data.currentUser._id);
                 toast.success(res.data.message, {
-                    position: "top-right",
+                    position: "bottom-center",
                     autoClose: 5000,
                     hideProgressBar: false,
                     closeOnClick: true,
@@ -224,7 +224,7 @@ export class Controller extends Component<{}, ChatStates> {
             .catch((err) => {
                 console.log(err);
                 toast.error(err.response.data.message, {
-                    position: "top-right",
+                    position: "bottom-center",
                     autoClose: 5000,
                     hideProgressBar: false,
                     closeOnClick: true,

@@ -54,7 +54,7 @@ export class Subscription extends Component<SubscriptionProps> {
                                             <ListItemIcon sx={{ minWidth: "35px" }}>
                                                 <CheckIcon sx={{ color: "green" }} />
                                             </ListItemIcon>
-                                            <ListItemText primary="Up to 100 messages per day" sx={{ color: "#09090b" }} />
+                                            <ListItemText primary="Up to 5000 messages per day" sx={{ color: "#09090b" }} />
                                         </ListItem>
                                         <ListItem sx={{ padding: 0 }}>
                                             <ListItemIcon sx={{ minWidth: "35px" }}>
@@ -113,7 +113,7 @@ export class Subscription extends Component<SubscriptionProps> {
                                             <ListItemIcon sx={{ minWidth: "35px" }}>
                                                 <CheckIcon sx={{ color: "green" }} />
                                             </ListItemIcon>
-                                            <ListItemText primary="Full access to chat service for 1 month" />
+                                            <ListItemText primary="Full access to chat service for 2 month" />
                                         </ListItem>
                                         <ListItem sx={{ padding: 0 }}>
                                             <ListItemIcon sx={{ minWidth: "35px" }}>
@@ -125,7 +125,7 @@ export class Subscription extends Component<SubscriptionProps> {
                                             <ListItemIcon sx={{ minWidth: "35px" }}>
                                                 <CheckIcon sx={{ color: "green" }} />
                                             </ListItemIcon>
-                                            <ListItemText primary="Up to 500 messages per day" sx={{ color: "#09090b" }} />
+                                            <ListItemText primary="Up to 10000 messages per day" sx={{ color: "#09090b" }} />
                                         </ListItem>
                                         <ListItem sx={{ padding: 0 }}>
                                             <ListItemIcon sx={{ minWidth: "35px" }}>
@@ -190,7 +190,7 @@ export class Subscription extends Component<SubscriptionProps> {
                                             <ListItemIcon sx={{ minWidth: "35px" }}>
                                                 <CheckIcon sx={{ color: "green" }} />
                                             </ListItemIcon>
-                                            <ListItemText primary="Full access to chat service for 1 month" />
+                                            <ListItemText primary="Full access to chat service for 3 month" />
                                         </ListItem>
                                         <ListItem sx={{ padding: 0 }}>
                                             <ListItemIcon sx={{ minWidth: "35px" }}>

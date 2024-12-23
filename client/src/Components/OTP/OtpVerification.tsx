@@ -53,7 +53,7 @@ class OtpVerification extends Component<{}, State> {
                     localStorage.setItem("userId", res.data.currentUser._id);
                     if (res.status === 200) {
                         toast.success(res.data.message, {
-                            position: "top-right",
+                            position: "bottom-center",
                             autoClose: 5000,
                             hideProgressBar: false,
                             closeOnClick: true,
@@ -69,7 +69,7 @@ class OtpVerification extends Component<{}, State> {
                 })
                 .catch((err) => {
                     toast.error(err.response.data.message, {
-                        position: "top-right",
+                        position: "bottom-center",
                         autoClose: 5000,
                         hideProgressBar: false,
                         closeOnClick: true,
@@ -137,7 +137,7 @@ class OtpVerification extends Component<{}, State> {
                                     }}
                                     sx={{
                                         width: 50,
-                                        height: 50,
+                                        height: "100%",
                                         borderRadius: 1,
                                         backgroundColor: "#f7f9fc",
                                         boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",

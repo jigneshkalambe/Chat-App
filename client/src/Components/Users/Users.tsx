@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import "./Users.css";
-import { Avatar, Badge, Box, IconButton, styled, Typography } from "@mui/material";
+import { Avatar, Badge, Box, Button, IconButton, styled, Typography } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { DeleteOutlineOutlined, MailOutline } from "@mui/icons-material";
 
 interface UserData {
     _id: string;
@@ -15,6 +16,7 @@ interface UserData {
     location: string;
     bio: string;
     subtitle: string;
+    pendingMsgCount: number;
 }
 
 interface OnlineState {
@@ -88,7 +90,7 @@ export class Users extends Component<UsersProps> {
                         </StyledBadge>
                     </div>
                     <div className="user-details">
-                        <Typography variant="subtitle1" component="p" className="user-name">
+                        <Typography variant="subtitle1" component="p" sx={{ fontWeight: 500 }} className="user-name">
                             {`${this.props.user.firstName} ${this.props.user.lastName}`}
                         </Typography>
                         <Typography variant="subtitle2" component="span" className={`user-status ${isOnline ? "online" : "offline"}`}>
@@ -96,10 +98,17 @@ export class Users extends Component<UsersProps> {
                         </Typography>
                     </div>
                 </div>
-                <Box className="delete-icon-container">
-                    <IconButton onClick={this.deleteHandler} aria-label="delete" className="delete-icon-button">
-                        <DeleteIcon className="deleteIcon" color="error" />
-                    </IconButton>
+                <Box sx={{ width: 40, height: 40, minWidth: 40, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                    <Button
+                        variant="outlined"
+                        sx={{ color: "red", borderColor: "red", display: "flex", justifyContent: "center", alignItems: "center", width: 40, height: 40, borderRadius: 50, minWidth: 0, padding: 0 }}
+                        onClick={this.deleteHandler}
+                        aria-label="delete"
+                        className="delete-icon-button"
+                    >
+                        <DeleteOutlineOutlined className="deleteIcon" />
+                    </Button>
+                    <Badge color="warning" badgeContent={this.props.user.pendingMsgCount} className="BadgeCount" />
                 </Box>
             </div>
         );

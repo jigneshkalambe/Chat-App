@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 import React, { Component } from "react";
 import "./Home.css";
 import Sidebar from "../Sidebar/Sidebar";
@@ -37,6 +38,7 @@ interface userData {
     location: string;
     bio: string;
     subtitle: string;
+    pendingMsgCount: number;
 }
 
 interface friendDataKey {
@@ -162,6 +164,7 @@ export class Home extends Component<{}, homeState> {
                 location: "",
                 bio: "",
                 subtitle: "",
+                pendingMsgCount: 0,
             },
             Img: {
                 file: null,
@@ -232,16 +235,22 @@ export class Home extends Component<{}, homeState> {
                 }),
                 async () => {
                     await axios
-                        .post(`${process.env.REACT_APP_API_URL}/account/msg`, {
-                            userId,
+                        .post(`${process.env.REACT_APP_API_URL}/account/receiverMsg`, {
                             currentAccEmail: this.state.formData.email,
                             messages: this.state.messages,
                         })
                         .then((res) => {
                             console.log(res);
+                            this.currentAccount();
+                            if (res.status === 200) {
+                                this.clearPendingCount();
+                            }
                         })
                         .catch((err) => {
                             console.log(err);
+                            if (err.status === 400) {
+                                this.currentAccount();
+                            }
                         });
                 }
             );
@@ -265,8 +274,8 @@ export class Home extends Component<{}, homeState> {
                         if (res.status === 200) {
                             this.currentAccount();
                         }
-                        toast.warning(res.data.message, {
-                            position: "top-right",
+                        toast.info(res.data.message, {
+                            position: "bottom-center",
                             autoClose: 5000,
                             hideProgressBar: false,
                             closeOnClick: true,
@@ -274,6 +283,9 @@ export class Home extends Component<{}, homeState> {
                             draggable: true,
                             theme: "light",
                             transition: Slide,
+                        });
+                        this.setState({
+                            friendRequestListCount: this.state.friendRequestListCount + 1,
                         });
                     })
                     .catch((err) => console.log(err));
@@ -317,6 +329,18 @@ export class Home extends Component<{}, homeState> {
         }
     };
 
+    clearPendingCount = async () => {
+        await axios
+            .post(`${process.env.REACT_APP_API_URL}/account/pendingMsg`, { currentAccEmail: this.state.formData.email, newUserEmail: this.state.selectedUser.email })
+            .then((res) => {
+                console.log(res);
+                this.currentAccount();
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
+
     currentAccount = async () => {
         await axios
             .get(`${process.env.REACT_APP_API_URL}/account/accountList`)
@@ -324,7 +348,8 @@ export class Home extends Component<{}, homeState> {
                 const userId = localStorage.getItem("userId");
                 const apiAccounts = res.data.accounts;
                 const currentAccount = apiAccounts.find((acc: any) => acc._id === userId);
-                console.log("CurrentAccount", currentAccount);
+                // console.log("call-- CurrentAccount", currentAccount);
+                // console.log(true);
                 if (currentAccount) {
                     this.setState(
                         {
@@ -538,7 +563,7 @@ export class Home extends Component<{}, homeState> {
                         this.currentAccount();
                     }
                     toast.success(res.data.message, {
-                        position: "top-right",
+                        position: "bottom-center",
                         autoClose: 5000,
                         hideProgressBar: false,
                         closeOnClick: true,
@@ -551,7 +576,7 @@ export class Home extends Component<{}, homeState> {
                 .catch((err) => {
                     console.log(err);
                     toast.error(err.response.data.message, {
-                        position: "top-right",
+                        position: "bottom-center",
                         autoClose: 5000,
                         hideProgressBar: false,
                         closeOnClick: true,
@@ -590,7 +615,7 @@ export class Home extends Component<{}, homeState> {
                     );
                     this.currentAccount();
                     toast.success(res.data.message, {
-                        position: "top-right",
+                        position: "bottom-center",
                         autoClose: 5000,
                         hideProgressBar: false,
                         closeOnClick: true,
@@ -604,7 +629,7 @@ export class Home extends Component<{}, homeState> {
             .catch((err) => {
                 console.log(err);
                 toast.error(err.response.data.message, {
-                    position: "top-right",
+                    position: "bottom-center",
                     autoClose: 5000,
                     hideProgressBar: false,
                     closeOnClick: true,
@@ -664,6 +689,8 @@ export class Home extends Component<{}, homeState> {
                             userId: localStorage.getItem("userId"),
                             currentAccEmail: this.state.formData.email,
                             messages: this.state.messages,
+                            onlineUsers: this.state.onlineState,
+                            selectedUser: this.state.selectedUser,
                         })
                         .then((res) => {
                             console.log(res);
@@ -699,7 +726,7 @@ export class Home extends Component<{}, homeState> {
                 if (res.status === 200) {
                     this.currentAccount();
                     toast.success(res.data.message, {
-                        position: "top-right",
+                        position: "bottom-center",
                         autoClose: 5000,
                         hideProgressBar: false,
                         closeOnClick: true,
@@ -721,6 +748,7 @@ export class Home extends Component<{}, homeState> {
                             location: "",
                             bio: "",
                             subtitle: "",
+                            pendingMsgCount: 0,
                         },
                     });
                 }
@@ -728,7 +756,7 @@ export class Home extends Component<{}, homeState> {
             .catch((err) => {
                 console.log(err);
                 toast.error(err.response.data.message, {
-                    position: "top-right",
+                    position: "bottom-center",
                     autoClose: 5000,
                     hideProgressBar: false,
                     closeOnClick: true,
@@ -814,7 +842,7 @@ export class Home extends Component<{}, homeState> {
 
             if (res.paymentDetails) {
                 toast.success("Payment successful", {
-                    position: "top-right",
+                    position: "bottom-center",
                     autoClose: 5000,
                     hideProgressBar: false,
                     closeOnClick: true,
@@ -842,7 +870,7 @@ export class Home extends Component<{}, homeState> {
                 );
             } else {
                 toast.error(res.error.message, {
-                    position: "top-right",
+                    position: "bottom-center",
                     autoClose: 5000,
                     hideProgressBar: false,
                     closeOnClick: true,
@@ -860,7 +888,7 @@ export class Home extends Component<{}, homeState> {
     subscriptionsHandler = (amount: string) => {
         if (this.state.paymentSuccessfully) {
             toast.error("Plan is already purchased!", {
-                position: "top-right",
+                position: "bottom-center",
                 autoClose: 5000,
                 hideProgressBar: false,
                 closeOnClick: true,
@@ -889,7 +917,7 @@ export class Home extends Component<{}, homeState> {
             if (isExpired) {
                 this.setState({ paymentSuccessfully: false });
                 toast.warning("Your subscription has expired. Please renew to continue.", {
-                    position: "top-right",
+                    position: "bottom-center",
                     autoClose: 5000,
                     hideProgressBar: false,
                     closeOnClick: true,
@@ -918,7 +946,15 @@ export class Home extends Component<{}, homeState> {
         });
     };
 
+    requestCountHandler = (text: string) => {
+        if (text === "Accept" || text === "Reject") {
+            this.setState({ friendRequestListCount: this.state.friendRequestListCount - 1 });
+        }
+    };
+
     render() {
+        // console.log("SelectedUser", this.state.selectedUser);
+
         const { components } = this.state;
         let componentRender: JSX.Element | null = null;
         if (components === "Profile") {
@@ -943,6 +979,7 @@ export class Home extends Component<{}, homeState> {
                     scrollToBottom={this.scrollToBottom}
                     messages={this.state.messages}
                     onlineState={this.state.onlineState}
+                    formData={this.state.formData}
                     userData={this.state.userData}
                     data={this.state.data}
                     gettingMsg={this.gettingMsg}
@@ -964,20 +1001,27 @@ export class Home extends Component<{}, homeState> {
                     LinksForModal={this.state.LinksForModal}
                     activeUserId={this.state.activeUserId}
                     activeUserIdFn={this.activeUserIdFn}
+                    currentAccountFn={this.currentAccount}
                 />
             );
         } else if (components === "Subscriptions") {
             componentRender = <Subscription subscriptionsHandler={this.subscriptionsHandler} />;
         } else if (components === "UserRequest") {
             componentRender = (
-                <FriendRequestPage friendData={this.state.friendData} friendRequestList={this.state.friendRequestList} currentAccountFn={this.currentAccount} navigateToChat={this.navigateToChats} />
+                <FriendRequestPage
+                    friendData={this.state.friendData}
+                    friendRequestList={this.state.friendRequestList}
+                    currentAccountFn={this.currentAccount}
+                    navigateToChat={this.navigateToChats}
+                    requestCountHandler={this.requestCountHandler}
+                />
             );
         }
         return (
             <>
                 {/* <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} theme="light" transition={Slide} /> */}
                 <div className="HomePage">
-                    <Sidebar components={this.state.components} componentRender={this.componentRender} />
+                    <Sidebar components={this.state.components} componentRender={this.componentRender} friendRequestListCount={this.state.friendRequestListCount} />
                     <HomeComponent>{componentRender}</HomeComponent>
                 </div>
             </>

@@ -59,18 +59,24 @@
 }
 
 .deleteIcon {
-    opacity: 0;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    transform: scale(0.8);
+    display: block;
 }
 
 .delete-icon-button {
     transition: background-color 0.3s ease;
+    display: none !important;
 }
 
-.Users:hover .deleteIcon {
-    opacity: 1;
-    transform: scale(1);
+.Users:hover .delete-icon-button {
+    display: block !important;
+}
+
+.BadgeCount {
+    display: block;
+}
+
+.Users:hover .BadgeCount {
+    display: none !important;
 }
 
 .active-user {

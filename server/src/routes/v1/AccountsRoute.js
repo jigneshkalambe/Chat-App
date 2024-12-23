@@ -13,5 +13,8 @@ router.post("/msg", enforceSubscriptionLimits, AccountController.userAccountMsg)
 router.post("/verifyOtp", AccountController.verifyOTP);
 router.post("/newFriendRequest", AccountController.friendRequestList);
 router.post("/isAcceptRequest", AccountController.AddorRemoveFriendRequest);
+router.post("/pendingMsg", AccountController.emptyPendingMsgCount);
+router.post("/receiverMsg", AccountController.receiverUserMsg);
+router.post("/receiverUserPendingReset", AccountController.resetReceiverUserPendingMsg);
 
 module.exports = router;

@@ -22,13 +22,13 @@
 
 .Toastify__toast {
     font-size: 14px;
-    width: 300px;
+    width: auto;
 }
 
-.Toastify__toast-container {
+/* .Toastify__toast-container {
     top: 20px;
     right: 20px;
-}
+} */
 
 @media (max-width: 576px) {
     .SignUpCard {

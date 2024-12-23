@@ -12,6 +12,7 @@ interface props {
     data: any;
     currentAccountFn: () => void;
     navigateToChat: (user: any) => void;
+    requestCountHandler: (text: string) => void;
 }
 
 export class UserRequest extends Component<props, States> {
@@ -32,7 +33,7 @@ export class UserRequest extends Component<props, States> {
                     this.props.currentAccountFn();
                 }
                 toast.success(res.data.message, {
-                    position: "top-right",
+                    position: "bottom-center",
                     autoClose: 5000,
                     hideProgressBar: false,
                     closeOnClick: true,
@@ -49,7 +50,7 @@ export class UserRequest extends Component<props, States> {
                     this.props.currentAccountFn();
                 }
                 toast.error(err.response.data.message, {
-                    position: "top-right",
+                    position: "bottom-center",
                     autoClose: 5000,
                     hideProgressBar: false,
                     closeOnClick: true,
@@ -89,6 +90,7 @@ export class UserRequest extends Component<props, States> {
                                     onClick={() => {
                                         this.setState({ isAccept: "Accept" }, () => {
                                             this.FriendRequestHandler(data._id);
+                                            this.props.requestCountHandler(this.state.isAccept);
                                         });
                                     }}
                                     variant="contained"
@@ -100,6 +102,7 @@ export class UserRequest extends Component<props, States> {
                                     onClick={() => {
                                         this.setState({ isAccept: "Reject" }, () => {
                                             this.FriendRequestHandler(data._id);
+                                            this.props.requestCountHandler(this.state.isAccept);
                                         });
                                     }}
                                     color="error"

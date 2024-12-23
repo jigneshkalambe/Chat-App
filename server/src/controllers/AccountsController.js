@@ -2,6 +2,7 @@ const Accounts = require("../model/CreateAccountModel");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const { OtpEmailTemplate, LoginOtpEmailTemplate } = require("../Template/EmailTemplates");
+const { default: mongoose } = require("mongoose");
 require("dotenv").config();
 
 const CreateAccount = async (req, res) => {
@@ -203,7 +204,7 @@ const FindAccount = async (req, res) => {
                 } else {
                     currentAccount.newUserLists.push(user);
                     await currentAccount.save();
-                    res.status(200).json({ message: "Account found", user });
+                    res.status(200).json({ message: "User successfully added to your account.", user });
                 }
             } else {
                 console.log("Current account not found");
@@ -226,7 +227,7 @@ const removeNewUserList = async (req, res) => {
                 currentAccount.newUserLists = currentAccount.newUserLists.filter((user) => user.email !== userData.email);
                 currentAccount.friendRequestList = currentAccount.friendRequestList.filter((user) => user.email !== userData.email);
                 await currentAccount.save();
-                res.status(200).json({ message: "Account deleted successfully", currentAccount });
+                res.status(200).json({ message: "Account removed successfully", currentAccount });
             } else {
                 res.status(404).json({ message: "User not found" });
             }
@@ -238,22 +239,187 @@ const removeNewUserList = async (req, res) => {
     }
 };
 
+// const userAccountMsg = async (req, res) => {
+//     try {
+//         const { currentAccEmail, messages, onlineUsers, selectedUser } = req.body;
+//         const currentAccount = await Accounts.findOne({ email: currentAccEmail });
+//         const isUserOnline = onlineUsers.findIndex((id) => id === selectedUser._id);
+//         const receiverUser = await Accounts.findOne({ _id: selectedUser._id });
+//         const cid = currentAccount._id;
+//         const rid = receiverUser._id;
+//         const msgs = messages[receiverUser?._id];
+//         if (currentAccount) {
+//             if (isUserOnline === -1) {
+//                 console.log("call", messages);
+//                 const finalMsgs = msgs?.map((e) => {
+//                     console.log("call---", e);
+//                     return { ...e, Author: e.Author == "me" ? cid : "me" };
+//                 });
+//                 currentAccount.messages = messages;
+//                 await currentAccount.save();
+//                 const subscription = req.subscription;
+//                 subscription.messagesSent += 1;
+//                 await subscription.save();
+
+//                 const receiverMsg = receiverUser.messages;
+//                 console.log("receiverMsg", receiverMsg);
+//                 const currentUserChat = receiverMsg;
+//                 console.log("currentUserChat", currentUserChat);
+//                 // await receiverUser.save();
+//             } else {
+//                 console.log("working");
+//                 currentAccount.messages = messages;
+//                 await currentAccount.save();
+//                 const subscription = req.subscription;
+//                 subscription.messagesSent += 1;
+//                 await subscription.save();
+//             }
+//             res.status(200).json({ message: "Messages updated successfully", currentAccount });
+//         } else {
+//             console.log("Current Account not found");
+//         }
+
+//         // if (currentAccount) {
+//         //     currentAccount.messages = messages;
+//         //     await currentAccount.save();
+//         //     const subscription = req.subscription;
+//         //     subscription.messagesSent += 1;
+//         //     await subscription.save();
+
+//         //     res.status(200).json({ message: "Messages updated successfully", currentAccount });
+//         // } else {
+//         //     console.log("Current Account not found");
+//         // }
+//     } catch (error) {
+//         console.log("call-- error", error);
+//         return res.status(500).json({ message: error.message });
+//     }
+// };
+
 const userAccountMsg = async (req, res) => {
     try {
-        const { currentAccEmail, messages } = req.body;
+        const { currentAccEmail, messages, onlineUsers, selectedUser } = req.body;
+        if (!selectedUser || !selectedUser._id || !mongoose.isValidObjectId(selectedUser._id)) {
+            return res.status(400).json({ message: "Invalid selected user ID" });
+        }
         const currentAccount = await Accounts.findOne({ email: currentAccEmail });
-        if (currentAccount) {
+        if (!currentAccount) {
+            return res.status(404).json({ message: "Current account not found" });
+        }
+
+        const receiverUser = await Accounts.findOne({ _id: selectedUser._id });
+        if (!receiverUser) {
+            return res.status(404).json({ message: "Receiver account not found" });
+        }
+
+        const isUserOnline = onlineUsers.findIndex((id) => id === selectedUser._id);
+        const senderId = currentAccount._id.toString();
+        const receiverId = receiverUser._id.toString();
+
+        const msgs = messages[receiverId];
+        if (!msgs || msgs.length === 0) {
+            return res.status(400).json({ message: "No messages to send" });
+        }
+
+        const formattedMsgs = msgs.map((msg) => ({
+            ...msg,
+            Author: msg.Author === "me" ? senderId : "me",
+        }));
+
+        if (isUserOnline === -1) {
+            console.log("receiverUser is offline, storing messages for later retrieval");
             currentAccount.messages = messages;
             await currentAccount.save();
             const subscription = req.subscription;
             subscription.messagesSent += 1;
             await subscription.save();
-
-            res.status(200).json({ message: "Messages updated successfully", currentAccount });
+            const receiverMessages = receiverUser.messages.get(senderId) || [];
+            receiverUser.messages.set(senderId, [...receiverMessages, ...formattedMsgs]);
+            const newUserPending = receiverUser.newUserLists.find((user) => user.email === currentAccount.email);
+            newUserPending.pendingMsgCount += 1;
+            await receiverUser.save();
         } else {
-            console.log("Current Account not found");
+            currentAccount.messages = messages;
+            await currentAccount.save();
+            const subscription = req.subscription;
+            subscription.messagesSent += 1;
+            await subscription.save();
+            const newUserPending = receiverUser.newUserLists.find((user) => user.email === currentAccount.email);
+            newUserPending.pendingMsgCount += 1;
+            await receiverUser.save();
         }
+
+        res.status(200).json({ message: "Messages processed successfully", currentAccount });
     } catch (error) {
+        console.log("Error processing messages:", error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const receiverUserMsg = async (req, res) => {
+    try {
+        const { currentAccEmail, messages } = req.body;
+        const currentAccount = await Accounts.findOne({ email: currentAccEmail });
+        if (!currentAccount) {
+            return res.status(404).json({ message: "Current account not found" });
+        }
+        currentAccount.messages = messages;
+        await currentAccount.save();
+        res.status(200).json({ message: "Messages processed successfully", currentAccount });
+    } catch (error) {
+        console.log("Error processing receiver user messages:", error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const emptyPendingMsgCount = async (req, res) => {
+    try {
+        const { currentAccEmail, newUserEmail } = req.body;
+        if (!currentAccEmail) {
+            console.log("Current account email is required");
+        }
+
+        if (!newUserEmail) {
+            console.log("New user email is required");
+        }
+
+        const currentAccount = await Accounts.findOne({ email: currentAccEmail });
+        if (!currentAccount) {
+            console.log("Current account not found");
+        }
+
+        const selectedUser = currentAccount.newUserLists.find((user) => user.email === newUserEmail);
+        if (!selectedUser) {
+            console.log("User not found in current account's new user list");
+        } else {
+            selectedUser.pendingMsgCount = 0;
+            await currentAccount.save();
+        }
+        res.status(200).json({ message: "Pending message count reset successfully" });
+    } catch (error) {
+        console.log("Error emptying pending message count:", error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const resetReceiverUserPendingMsg = async (req, res) => {
+    try {
+        const { currentAccEmail, newUserEmail } = req.body;
+        const ReceiverUser = await Accounts.findOne({ email: newUserEmail });
+        if (!ReceiverUser) {
+            throw new Error("Receiver user not found");
+        }
+        console.log("resetReceiverUserPendingMsg", ReceiverUser);
+        const CurrentAccInReceiverUser = ReceiverUser.newUserLists.find((user) => user.email === currentAccEmail);
+        if (!CurrentAccInReceiverUser) {
+            throw new Error("Current account not found in receiver user's new user list");
+        }
+        console.log("CurrentAccInReceiverUser", CurrentAccInReceiverUser);
+        CurrentAccInReceiverUser.pendingMsgCount = 0;
+        await ReceiverUser.save();
+        res.status(200).json({ message: "Receiver user pending message count reset successfully", CurrentAccInReceiverUser });
+    } catch (error) {
+        console.log("Error resetting receiver user pending message:", error);
         return res.status(500).json({ message: error.message });
     }
 };
@@ -283,11 +449,11 @@ const friendRequestList = async (req, res) => {
         const { from, to } = req.body;
         console.log(req.body);
         if (!from) {
-            console.log("Didnt received from");
+            console.log("Didn't received from");
         }
 
         if (!to) {
-            console.log("Didnt received to");
+            console.log("Didn't received to");
         }
 
         const friend = await Accounts.findOne({ _id: from });
@@ -299,9 +465,19 @@ const friendRequestList = async (req, res) => {
         if (!currentAccount) {
             return res.status(404).json({ message: "Current Account not found" });
         }
-        currentAccount.friendRequestList.push(friend);
-        await currentAccount.save();
-        res.status(200).json({ message: "Got new friend request" });
+
+        const isFriend = currentAccount.friendRequestList.some((user) => {
+            return user.email === friend.email;
+        });
+
+        if (isFriend) {
+            return;
+        } else {
+            currentAccount.friendRequestList.push(friend);
+            await currentAccount.save();
+        }
+
+        res.status(200).json({ message: "You have a new friend request." });
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
@@ -333,4 +509,18 @@ const AddorRemoveFriendRequest = async (req, res) => {
     }
 };
 
-module.exports = { CreateAccount, AccountList, LoginAccount, UpdateAccount, FindAccount, removeNewUserList, userAccountMsg, verifyOTP, friendRequestList, AddorRemoveFriendRequest };
+module.exports = {
+    CreateAccount,
+    AccountList,
+    LoginAccount,
+    UpdateAccount,
+    FindAccount,
+    removeNewUserList,
+    userAccountMsg,
+    verifyOTP,
+    friendRequestList,
+    AddorRemoveFriendRequest,
+    emptyPendingMsgCount,
+    receiverUserMsg,
+    resetReceiverUserPendingMsg,
+};

@@ -50,6 +50,19 @@
     overflow: hidden;
     border-radius: 10px;
     transition: background-color 0.3s ease;
+    position: relative;
+}
+
+.count {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    color: black;
+    font-size: 14px;
+    font-weight: 700;
+    top: 2px;
+    right: 5px;
 }
 
 .header_icon {

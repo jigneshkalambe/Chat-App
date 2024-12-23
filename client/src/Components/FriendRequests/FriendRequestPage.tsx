@@ -45,6 +45,7 @@ interface props {
     friendRequestList: friendDataKey[];
     currentAccountFn: () => void;
     navigateToChat: (user: any) => void;
+    requestCountHandler: (text: string) => void;
 }
 
 export class FriendRequestPage extends Component<props, States> {
@@ -91,7 +92,12 @@ export class FriendRequestPage extends Component<props, States> {
                         : this.props.friendRequestList.map((val: any, ind: any) => {
                               return (
                                   <div key={ind}>
-                                      <UserRequest data={val} currentAccountFn={this.props.currentAccountFn} navigateToChat={this.props.navigateToChat} />
+                                      <UserRequest
+                                          data={val}
+                                          currentAccountFn={this.props.currentAccountFn}
+                                          navigateToChat={this.props.navigateToChat}
+                                          requestCountHandler={this.props.requestCountHandler}
+                                      />
                                       <Divider sx={{ borderColor: "#ccc" }} />
                                   </div>
                               );

@@ -17,6 +17,7 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import DocIcon from "../../Images/doc.png";
 import PdfIcon from "../../Images/pdf.png";
+import axios from "axios";
 
 interface joinRoomData {
     username: string;
@@ -35,6 +36,20 @@ interface data {
 
 interface userData {
     _id: string;
+    photoName: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    gender: string;
+    age: string;
+    number: string;
+    location: string;
+    bio: string;
+    subtitle: string;
+    pendingMsgCount: number;
+}
+
+interface formDataTypes {
     photoName: string;
     firstName: string;
     lastName: string;
@@ -73,6 +88,7 @@ interface chatStates {
     windowWidth: number;
     isPickerVisible: boolean;
     currentImg: string | undefined;
+    counts: number;
 }
 
 interface chatProps {
@@ -101,6 +117,8 @@ interface chatProps {
     LinksForModal: LinksForModalTypes;
     activeUserIdFn: (Id: string) => void;
     activeUserId: string;
+    formData: formDataTypes;
+    currentAccountFn: () => void;
 }
 
 interface FadeProps {
@@ -156,6 +174,7 @@ export class Chats extends Component<chatProps, chatStates> {
             windowWidth: window.innerWidth,
             isPickerVisible: false,
             currentImg: "",
+            counts: 0,
         };
     }
 
@@ -163,7 +182,7 @@ export class Chats extends Component<chatProps, chatStates> {
         window.addEventListener("resize", this.handleResize);
     }
 
-    componentDidUpdate(prevProps: chatProps) {
+    componentDidUpdate(prevProps: Readonly<chatProps>, prevState: Readonly<chatStates>, snapshot?: any): void {
         if (prevProps.messages !== this.props.messages) {
             this.props.scrollToBottom();
         }
@@ -193,6 +212,11 @@ export class Chats extends Component<chatProps, chatStates> {
                 msg: "",
                 isAttachOpen: true,
             });
+            setTimeout(() => {
+                this.setState({
+                    counts: this.state.counts + 1,
+                });
+            }, 3000);
         } else {
             alert("Please enter a message");
         }
@@ -221,6 +245,18 @@ export class Chats extends Component<chatProps, chatStates> {
         } else {
             alert("Please fill in both fields");
         }
+    };
+
+    pendingChatHandler = async (val: any) => {
+        await axios
+            .post(`${process.env.REACT_APP_API_URL}/account/pendingMsg`, { currentAccEmail: this.props.formData.email, newUserEmail: val.email })
+            .then((res) => {
+                console.log(res);
+                this.props.currentAccountFn();
+            })
+            .catch((err) => {
+                console.log(err);
+            });
     };
 
     render() {
@@ -318,6 +354,7 @@ export class Chats extends Component<chatProps, chatStates> {
                                         className={this.props.activeUserId === val._id ? "active-user" : ""}
                                         onClick={() => {
                                             this.props.activeUserIdFn(val._id);
+                                            this.pendingChatHandler(val);
                                         }}
                                     >
                                         <Users
@@ -394,8 +431,8 @@ export class Chats extends Component<chatProps, chatStates> {
                     </div>
                 </div>
                 <div className={`col-xl-9 col-lg-8 col-md-12 col-12 d-flex align-items-center justify-content-center bg-white ${isSelected ? "h-100" : ""}`}>
-                    {Object.values(this.props.selectedUser).every((value) => value === "") ? (
-                        "No Converstion or Messages"
+                    {this.props.selectedUser.email === "" && this.props.selectedUser.pendingMsgCount === 0 ? (
+                        "No Conversations or Messages"
                     ) : (
                         <div className="chat_body">
                             <div className="chat_msg_header">

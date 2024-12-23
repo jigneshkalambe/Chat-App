@@ -2,8 +2,6 @@ import { Avatar, Box, Button, Card, Stack, Typography } from "@mui/material";
 import React, { Component } from "react";
 import "./SignUp.css";
 import HocInput from "../HocInput";
-import { Slide, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 interface formDataTypes {
     firstName: string;
     lastName: string;

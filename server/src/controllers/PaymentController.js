@@ -59,7 +59,7 @@ const paymentVerify = async (req, res) => {
 const isPaymentSuccessful = async (req, res) => {
     try {
         const { paymentSuccessfully, currentAccEmail, amount } = req.body;
-        console.log("req.body", req.body);
+        // console.log("req.body", req.body);
         if (!paymentSuccessfully) {
             throw new Error("Payment is unsuccessful");
         }
@@ -78,11 +78,11 @@ const isPaymentSuccessful = async (req, res) => {
         if (amount === "50") {
             planType = "Basic";
             duration = 30;
-            messageLimit = 100;
+            messageLimit = 5000;
         } else if (amount === "100") {
             planType = "Standard";
             duration = 60;
-            messageLimit = 500;
+            messageLimit = 10000;
         } else if (amount === "150") {
             planType = "Premium";
             duration = 90;

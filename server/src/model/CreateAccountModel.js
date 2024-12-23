@@ -88,6 +88,11 @@ const newUserListsSchema = new mongoose.Schema({
         trim: true,
         default: "",
     },
+    pendingMsgCount: {
+        type: Number,
+        required: false,
+        default: 0,
+    },
 });
 
 const newFriendRequest = new mongoose.Schema({
