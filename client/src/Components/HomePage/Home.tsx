@@ -294,6 +294,12 @@ export class Home extends Component<{}, homeState> {
             }
         });
 
+        this.socket.on("editOrDelete", (data) => {
+            if (data) {
+                this.currentAccount();
+            }
+        });
+
         this.socket.on("onlineUsers", (online) => {
             // console.log("Online Users", online);
             this.setState({ onlineState: online });
@@ -594,7 +600,6 @@ export class Home extends Component<{}, homeState> {
             .post(`${process.env.REACT_APP_API_URL}/account/findAccount`, { currentAccEmail: this.state.formData.email, email: value.username, number: value.room })
             .then((res) => {
                 console.log(res);
-                const apiData = res.data.user;
                 // console.log("userData", this.state.userData);
                 const exitsUser = this.state.userData.findIndex((user) => user._id === res.data.user._id);
                 // console.log("roomhandler", exitsUser);
@@ -953,7 +958,7 @@ export class Home extends Component<{}, homeState> {
     };
 
     render() {
-        // console.log("SelectedUser", this.state.selectedUser);
+        // console.log("SelectedUser", this.state.messages[this.state.selectedUser._id]);
 
         const { components } = this.state;
         let componentRender: JSX.Element | null = null;
@@ -1002,6 +1007,7 @@ export class Home extends Component<{}, homeState> {
                     activeUserId={this.state.activeUserId}
                     activeUserIdFn={this.activeUserIdFn}
                     currentAccountFn={this.currentAccount}
+                    socket={this.socket}
                 />
             );
         } else if (components === "Subscriptions") {

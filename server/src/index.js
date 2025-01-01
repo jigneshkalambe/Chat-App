@@ -79,7 +79,19 @@ io.on("connection", (socket) => {
         if (recipientId) {
             io.to(recipientId).emit("friend_request", { from: data.from, to: data.to });
         } else {
-            console.log(`Didnt received ${data}`);
+            console.log(`friend_request Didn't received ${data}`);
+            socket.emit("did not able to send request");
+        }
+    });
+
+    socket.on("editOrDelete", async ({ toUserId }) => {
+        console.log(toUserId);
+        const recipientId = usersInRooms[toUserId];
+        console.log(recipientId);
+        if (recipientId) {
+            io.to(recipientId).emit("editOrDelete", { toUserId });
+        } else {
+            console.log(`editOrDelete Didn't received ${toUserId}`);
             socket.emit("did not able to send request");
         }
     });

@@ -16,5 +16,7 @@ router.post("/isAcceptRequest", AccountController.AddorRemoveFriendRequest);
 router.post("/pendingMsg", AccountController.emptyPendingMsgCount);
 router.post("/receiverMsg", AccountController.receiverUserMsg);
 router.post("/receiverUserPendingReset", AccountController.resetReceiverUserPendingMsg);
+router.post("/deleteMsg", AccountController.deleteMsgForMeHandler);
+router.post("/editMsg", AccountController.EditMsgHandler);
 
 module.exports = router;

@@ -239,63 +239,6 @@ const removeNewUserList = async (req, res) => {
     }
 };
 
-// const userAccountMsg = async (req, res) => {
-//     try {
-//         const { currentAccEmail, messages, onlineUsers, selectedUser } = req.body;
-//         const currentAccount = await Accounts.findOne({ email: currentAccEmail });
-//         const isUserOnline = onlineUsers.findIndex((id) => id === selectedUser._id);
-//         const receiverUser = await Accounts.findOne({ _id: selectedUser._id });
-//         const cid = currentAccount._id;
-//         const rid = receiverUser._id;
-//         const msgs = messages[receiverUser?._id];
-//         if (currentAccount) {
-//             if (isUserOnline === -1) {
-//                 console.log("call", messages);
-//                 const finalMsgs = msgs?.map((e) => {
-//                     console.log("call---", e);
-//                     return { ...e, Author: e.Author == "me" ? cid : "me" };
-//                 });
-//                 currentAccount.messages = messages;
-//                 await currentAccount.save();
-//                 const subscription = req.subscription;
-//                 subscription.messagesSent += 1;
-//                 await subscription.save();
-
-//                 const receiverMsg = receiverUser.messages;
-//                 console.log("receiverMsg", receiverMsg);
-//                 const currentUserChat = receiverMsg;
-//                 console.log("currentUserChat", currentUserChat);
-//                 // await receiverUser.save();
-//             } else {
-//                 console.log("working");
-//                 currentAccount.messages = messages;
-//                 await currentAccount.save();
-//                 const subscription = req.subscription;
-//                 subscription.messagesSent += 1;
-//                 await subscription.save();
-//             }
-//             res.status(200).json({ message: "Messages updated successfully", currentAccount });
-//         } else {
-//             console.log("Current Account not found");
-//         }
-
-//         // if (currentAccount) {
-//         //     currentAccount.messages = messages;
-//         //     await currentAccount.save();
-//         //     const subscription = req.subscription;
-//         //     subscription.messagesSent += 1;
-//         //     await subscription.save();
-
-//         //     res.status(200).json({ message: "Messages updated successfully", currentAccount });
-//         // } else {
-//         //     console.log("Current Account not found");
-//         // }
-//     } catch (error) {
-//         console.log("call-- error", error);
-//         return res.status(500).json({ message: error.message });
-//     }
-// };
-
 const userAccountMsg = async (req, res) => {
     try {
         const { currentAccEmail, messages, onlineUsers, selectedUser } = req.body;
@@ -327,7 +270,7 @@ const userAccountMsg = async (req, res) => {
         }));
 
         if (isUserOnline === -1) {
-            console.log("receiverUser is offline, storing messages for later retrieval");
+            // console.log("receiverUser is offline, storing messages for later retrieval");
             currentAccount.messages = messages;
             await currentAccount.save();
             const subscription = req.subscription;
@@ -409,12 +352,12 @@ const resetReceiverUserPendingMsg = async (req, res) => {
         if (!ReceiverUser) {
             throw new Error("Receiver user not found");
         }
-        console.log("resetReceiverUserPendingMsg", ReceiverUser);
+        // console.log("resetReceiverUserPendingMsg", ReceiverUser);
         const CurrentAccInReceiverUser = ReceiverUser.newUserLists.find((user) => user.email === currentAccEmail);
         if (!CurrentAccInReceiverUser) {
             throw new Error("Current account not found in receiver user's new user list");
         }
-        console.log("CurrentAccInReceiverUser", CurrentAccInReceiverUser);
+        // console.log("CurrentAccInReceiverUser", CurrentAccInReceiverUser);
         CurrentAccInReceiverUser.pendingMsgCount = 0;
         await ReceiverUser.save();
         res.status(200).json({ message: "Receiver user pending message count reset successfully", CurrentAccInReceiverUser });
@@ -447,7 +390,7 @@ const verifyOTP = async (req, res) => {
 const friendRequestList = async (req, res) => {
     try {
         const { from, to } = req.body;
-        console.log(req.body);
+        // console.log(req.body);
         if (!from) {
             console.log("Didn't received from");
         }
@@ -488,7 +431,7 @@ const AddorRemoveFriendRequest = async (req, res) => {
         const { CurrentAccId, _id, text } = req.body;
         const CurrentAccount = await Accounts.findOne({ _id: CurrentAccId });
         const User = await Accounts.findOne({ _id });
-        console.log(User);
+        // console.log(User);
         if (text === "Accept") {
             CurrentAccount.newUserLists.push(User);
             const Friend = CurrentAccount.friendRequestList.find((user) => user.email === User.email);
@@ -509,6 +452,121 @@ const AddorRemoveFriendRequest = async (req, res) => {
     }
 };
 
+const deleteMsgForMeHandler = async (req, res) => {
+    try {
+        const { currentAccEmail, selectedUserId, selectedMsg, deleteText } = req.body;
+
+        if (!currentAccEmail) {
+            throw new Error("Didn't receive currentEmail");
+        }
+        if (!selectedUserId) {
+            throw new Error("Didn't receive selectedUserId");
+        }
+        if (!selectedMsg) {
+            throw new Error("Didn't receive selectedMsg");
+        }
+        if (!deleteText) {
+            throw new Error("Didn't receive deleteText");
+        }
+
+        const CurrentAccount = await Accounts.findOne({ email: currentAccEmail });
+        if (!CurrentAccount) {
+            throw new Error("Account not found");
+        }
+
+        const currentChat = CurrentAccount.messages.get(selectedUserId);
+        if (!currentChat) {
+            throw new Error("Chat not found");
+        }
+
+        const Msg = currentChat.find((chats) => chats.messages === selectedMsg.messages && chats.time === selectedMsg.time);
+        if (!Msg) {
+            throw new Error("Message not found");
+        }
+
+        if (deleteText === "for_me") {
+            currentChat.splice(currentChat.indexOf(Msg), 1);
+            await CurrentAccount.save();
+            return res.status(200).json({ message: "Message deleted for you" });
+        } else {
+            const ReceiverAccount = await Accounts.findOne({ _id: selectedUserId });
+            if (!ReceiverAccount) {
+                throw new Error("Receiver Account not found");
+            }
+
+            const receiverChat = ReceiverAccount.messages.get(CurrentAccount._id);
+
+            if (receiverChat) {
+                const ReceiverMsg = receiverChat.find((chats) => chats.messages === selectedMsg.messages && chats.time === selectedMsg.time);
+                if (ReceiverMsg) {
+                    receiverChat.splice(receiverChat.indexOf(ReceiverMsg), 1);
+                    await ReceiverAccount.save();
+                } else {
+                    console.log("ReceiverMsg not found or already deleted");
+                }
+            }
+
+            currentChat.splice(currentChat.indexOf(Msg), 1);
+            await CurrentAccount.save();
+
+            return res.status(200).json({ message: "Message deleted for both" });
+        }
+    } catch (error) {
+        console.log("deleteMsgForMeHandler", error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const EditMsgHandler = async (req, res) => {
+    try {
+        const { currentAccEmail, selectedUserId, selectedMsg, editMsg } = req.body;
+        if ((!currentAccEmail, !selectedMsg, !selectedUserId, !editMsg)) {
+            return res.status(400).json({ message: "Missing Important Properties" });
+        }
+        const CurrentAccount = await Accounts.findOne({ email: currentAccEmail });
+        const ReceiverAccount = await Accounts.findOne({ _id: selectedUserId });
+
+        if (!CurrentAccount) {
+            throw new Error("Account not found");
+        }
+
+        if (!ReceiverAccount) {
+            throw new Error("Receiver Account not found");
+        }
+
+        const currentChat = CurrentAccount.messages.get(selectedUserId);
+        if (!currentChat) {
+            throw new Error("Chat not found");
+        }
+
+        const Msg = currentChat.find((chats) => chats.messages === selectedMsg.messages && chats.time === selectedMsg.time);
+        if (!Msg) {
+            throw new Error("Message not found");
+        }
+
+        const receiverChat = ReceiverAccount.messages.get(CurrentAccount._id);
+        if (!receiverChat) {
+            throw new Error("Receiver Chat not found");
+        }
+
+        const ReceiverMsg = receiverChat.find((chats) => chats.messages === selectedMsg.messages && chats.time === selectedMsg.time);
+        if (!ReceiverMsg) {
+            throw new Error("Receiver Message not found", ReceiverMsg);
+        }
+
+        Msg.messages = editMsg;
+        ReceiverMsg.messages = editMsg;
+
+        await CurrentAccount.save();
+        await ReceiverAccount.save();
+
+        return res.status(200).json({ message: "Message Edited Successfully" });
+    } catch (error) {
+        console.log("EditMsgHandler", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     CreateAccount,
     AccountList,
@@ -523,4 +581,6 @@ module.exports = {
     emptyPendingMsgCount,
     receiverUserMsg,
     resetReceiverUserPendingMsg,
+    deleteMsgForMeHandler,
+    EditMsgHandler,
 };

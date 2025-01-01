@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./Chats.css";
-import { Avatar, Backdrop, Box, Button, Divider, Modal, Stack, Tooltip, Typography } from "@mui/material";
+import { Avatar, Backdrop, Box, Button, Dialog, DialogTitle, Divider, Menu, MenuItem, Modal, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import PersonAddOutlinedIcon from "@mui/icons-material/PersonAddOutlined";
 import Users from "../Users/Users";
@@ -15,9 +15,11 @@ import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
+import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import DocIcon from "../../Images/doc.png";
 import PdfIcon from "../../Images/pdf.png";
 import axios from "axios";
+import { Socket } from "socket.io-client";
 
 interface joinRoomData {
     username: string;
@@ -89,6 +91,11 @@ interface chatStates {
     isPickerVisible: boolean;
     currentImg: string | undefined;
     counts: number;
+    anchorEl: HTMLElement | null;
+    openDailog: boolean;
+    dialogBoxTypes: "delete" | "edit";
+    selectedMsg: data;
+    editMsg: string;
 }
 
 interface chatProps {
@@ -119,6 +126,7 @@ interface chatProps {
     activeUserId: string;
     formData: formDataTypes;
     currentAccountFn: () => void;
+    socket: Socket;
 }
 
 interface FadeProps {
@@ -175,6 +183,19 @@ export class Chats extends Component<chatProps, chatStates> {
             isPickerVisible: false,
             currentImg: "",
             counts: 0,
+            anchorEl: null,
+            openDailog: false,
+            dialogBoxTypes: "delete",
+            selectedMsg: {
+                Author: "",
+                messages: "",
+                time: "",
+                Image: "",
+                audio: "",
+                video: "",
+                docpdf: "",
+            },
+            editMsg: "",
         };
     }
 
@@ -251,7 +272,7 @@ export class Chats extends Component<chatProps, chatStates> {
         await axios
             .post(`${process.env.REACT_APP_API_URL}/account/pendingMsg`, { currentAccEmail: this.props.formData.email, newUserEmail: val.email })
             .then((res) => {
-                console.log(res);
+                // console.log(res);
                 this.props.currentAccountFn();
             })
             .catch((err) => {
@@ -259,7 +280,67 @@ export class Chats extends Component<chatProps, chatStates> {
             });
     };
 
+    handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        this.setState({ anchorEl: event.currentTarget });
+    };
+
+    handleClose = () => {
+        this.setState({ anchorEl: null });
+    };
+
+    dialogOpenHandler = () => {
+        this.setState({ openDailog: true });
+    };
+
+    dialogCloseHandler = () => {
+        this.setState({ openDailog: false });
+    };
+
+    deleteMsgHandler = async (value: string) => {
+        await axios
+            .post(`${process.env.REACT_APP_API_URL}/account/deleteMsg`, {
+                currentAccEmail: this.props.formData.email,
+                selectedUserId: this.props.selectedUser._id,
+                selectedMsg: this.state.selectedMsg,
+                deleteText: value,
+            })
+            .then((res) => {
+                // console.log(res);
+                this.setState({ openDailog: false });
+                if (res.status === 200) {
+                    this.props.currentAccountFn();
+                    this.props.socket.emit("editOrDelete", { toUserId: this.props.selectedUser._id });
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
+
+    editMsgHandler = async () => {
+        await axios
+            .post(`${process.env.REACT_APP_API_URL}/account/editMsg`, {
+                currentAccEmail: this.props.formData.email,
+                selectedUserId: this.props.selectedUser._id,
+                selectedMsg: this.state.selectedMsg,
+                editMsg: this.state.editMsg,
+            })
+            .then((res) => {
+                console.log("editMsgHandler", res);
+                this.setState({ openDailog: false });
+                if (res.status === 200) {
+                    this.props.currentAccountFn();
+                    this.props.socket.emit("editOrDelete", { toUserId: this.props.selectedUser._id });
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
+
     render() {
+        const { anchorEl } = this.state;
+        const open = Boolean(anchorEl);
         const style = {
             position: "absolute",
             top: "50%",
@@ -330,6 +411,26 @@ export class Chats extends Component<chatProps, chatStates> {
             display: "flex",
             alignItems: "start",
             height: this.state.windowWidth > 991 ? "100%" : "auto",
+        };
+
+        const isEditBtnLeft = {
+            minWidth: 0,
+            width: 20,
+            height: 30,
+            color: "#3C3D37",
+            position: "absolute",
+            top: 0,
+            right: "-20px",
+        };
+
+        const isEditBtnRight = {
+            minWidth: 0,
+            width: 20,
+            height: 30,
+            color: "#3C3D37",
+            position: "absolute",
+            top: 0,
+            left: "-20px",
         };
 
         const isSelected = Object.values(this.props.selectedUser).every((value) => value === "");
@@ -503,8 +604,21 @@ export class Chats extends Component<chatProps, chatStates> {
                                             display: "flex",
                                             flexWrap: "wrap",
                                             flexDirection: "column",
+                                            position: "relative",
                                         }}
                                     >
+                                        <Button
+                                            variant="text"
+                                            sx={msg.Author === this.props.selectedUser._id ? isEditBtnLeft : isEditBtnRight}
+                                            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                                                this.setState({ anchorEl: event?.currentTarget, selectedMsg: msg, editMsg: msg.messages });
+                                            }}
+                                            aria-controls={open ? "basic-menu" : undefined}
+                                            aria-haspopup="true"
+                                            aria-expanded={open ? "true" : undefined}
+                                        >
+                                            <MoreVertOutlinedIcon />
+                                        </Button>
                                         <span
                                             style={{
                                                 display: "inline-block",
@@ -605,6 +719,113 @@ export class Chats extends Component<chatProps, chatStates> {
                                         </span>
                                     </div>
                                 ))}
+                                <Paper>
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        open={open}
+                                        onClose={this.handleClose}
+                                        MenuListProps={{
+                                            "aria-labelledby": "basic-button",
+                                        }}
+                                        sx={{
+                                            position: "absolute",
+                                            top: "-95px",
+                                            left: "-90px",
+                                        }}
+                                    >
+                                        <MenuItem
+                                            onClick={() => {
+                                                this.setState({
+                                                    anchorEl: null,
+                                                    openDailog: true,
+                                                    dialogBoxTypes: "delete",
+                                                });
+                                            }}
+                                            style={{ padding: "10px 20px", minWidth: "auto" }}
+                                        >
+                                            Delete
+                                        </MenuItem>
+                                        {this.state.selectedMsg?.Author !== this.props.selectedUser._id && (
+                                            <MenuItem
+                                                onClick={() => {
+                                                    this.setState({
+                                                        anchorEl: null,
+                                                        openDailog: true,
+                                                        dialogBoxTypes: "edit",
+                                                    });
+                                                }}
+                                                style={{ padding: "10px 20px", minWidth: "auto" }}
+                                            >
+                                                Edit
+                                            </MenuItem>
+                                        )}
+                                    </Menu>
+                                </Paper>
+                                <Dialog
+                                    open={this.state.openDailog}
+                                    keepMounted
+                                    onClose={() => {
+                                        this.setState({ openDailog: false });
+                                    }}
+                                    sx={{ boxShadow: 0 }}
+                                    PaperProps={{
+                                        sx: {
+                                            maxWidth: "450px",
+                                            width: "100%",
+                                        },
+                                    }}
+                                >
+                                    {this.state.dialogBoxTypes === "delete" ? (
+                                        <>
+                                            <DialogTitle>{"Delete message?"}</DialogTitle>
+                                            <Stack direction={"column"} sx={{ padding: "10px" }}>
+                                                <Stack direction={"row"} justifyContent={"flex-end"}>
+                                                    <Button variant="text" onClick={() => this.deleteMsgHandler("for_me")}>
+                                                        <Typography variant="subtitle1" component={"p"} sx={{ fontSize: "16px", fontWeight: 600, margin: 0 }}>
+                                                            delete for me
+                                                        </Typography>
+                                                    </Button>
+                                                </Stack>
+                                                <Stack direction={"row"} justifyContent={"flex-end"}>
+                                                    <Button variant="text" onClick={this.dialogCloseHandler}>
+                                                        <Typography variant="subtitle1" component={"p"} sx={{ fontSize: "16px", fontWeight: 600, margin: 0 }}>
+                                                            cancel
+                                                        </Typography>
+                                                    </Button>
+                                                </Stack>
+                                                {this.state.selectedMsg?.Author !== this.props.selectedUser._id && (
+                                                    <Stack direction={"row"} justifyContent={"flex-end"}>
+                                                        <Button variant="text" onClick={() => this.deleteMsgHandler("for_everyone")}>
+                                                            <Typography variant="subtitle1" component={"p"} sx={{ fontSize: "16px", fontWeight: 600, margin: 0 }}>
+                                                                delete for everyone
+                                                            </Typography>
+                                                        </Button>
+                                                    </Stack>
+                                                )}
+                                            </Stack>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <DialogTitle>{"Edit message"}</DialogTitle>
+                                            <Box sx={{ display: "flex", gap: 1, padding: "10px" }}>
+                                                <input
+                                                    value={this.state.editMsg}
+                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                        this.setState({ editMsg: e.target.value });
+                                                    }}
+                                                    className="form-control w-100"
+                                                    type="text"
+                                                    placeholder="Edit Message"
+                                                ></input>
+                                                <Button variant="contained" onClick={this.editMsgHandler}>
+                                                    <Typography variant="subtitle1" component={"p"} sx={{ fontSize: "16px", fontWeight: 600 }}>
+                                                        Save
+                                                    </Typography>
+                                                </Button>
+                                            </Box>
+                                        </>
+                                    )}
+                                </Dialog>
                             </div>
                             <Modal
                                 open={this.state.isModal}
