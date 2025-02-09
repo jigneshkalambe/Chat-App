@@ -326,7 +326,7 @@ export class Chats extends Component<chatProps, chatStates> {
                 editMsg: this.state.editMsg,
             })
             .then((res) => {
-                console.log("editMsgHandler", res);
+                // console.log("editMsgHandler", res);
                 this.setState({ openDailog: false });
                 if (res.status === 200) {
                     this.props.currentAccountFn();

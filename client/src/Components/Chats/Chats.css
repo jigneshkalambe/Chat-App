@@ -135,6 +135,12 @@
     left: 20px;
 }
 
+.EmojiPickerReact {
+    background-color: white !important;
+    border-radius: 10px !important;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
 .attachFilesBox {
     width: 400px;
     height: 200px;
@@ -181,6 +187,12 @@
 
     .EmojiDiv {
         left: 12px;
+    }
+
+    .EmojiPickerReact {
+        width: 100% !important;
+        max-height: 400px !important;
+        height: 100% !important;
     }
 }
 

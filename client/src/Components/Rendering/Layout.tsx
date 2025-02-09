@@ -6,7 +6,7 @@ import "./Layout.css";
 
 export class Layout extends Controller {
     render() {
-        console.log(this.state.isSignIn);
+        // console.log(this.state.isSignIn);
         return (
             <div className="layoutContainer">
                 <>

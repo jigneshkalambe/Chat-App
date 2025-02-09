@@ -240,7 +240,7 @@ export class Home extends Component<{}, homeState> {
                             messages: this.state.messages,
                         })
                         .then((res) => {
-                            console.log(res);
+                            // console.log(res);
                             this.currentAccount();
                             if (res.status === 200) {
                                 this.clearPendingCount();
@@ -257,7 +257,7 @@ export class Home extends Component<{}, homeState> {
         });
 
         this.socket.on("userUpdated", (updatedUser) => {
-            console.log("User updated:", updatedUser);
+            // console.log("User updated:", updatedUser);
 
             this.setState((prevState) => ({
                 userData: prevState.userData.map((user) => (user.email === updatedUser.email ? updatedUser : user)),
@@ -265,12 +265,12 @@ export class Home extends Component<{}, homeState> {
         });
 
         this.socket.on("friend_request", async (data) => {
-            console.log(data);
+            // console.log(data);
             if (data) {
                 await axios
                     .post(`${process.env.REACT_APP_API_URL}/account/newFriendRequest`, { from: data.from, to: data.to })
                     .then((res) => {
-                        console.log(res);
+                        // console.log(res);
                         if (res.status === 200) {
                             this.currentAccount();
                         }
@@ -339,7 +339,7 @@ export class Home extends Component<{}, homeState> {
         await axios
             .post(`${process.env.REACT_APP_API_URL}/account/pendingMsg`, { currentAccEmail: this.state.formData.email, newUserEmail: this.state.selectedUser.email })
             .then((res) => {
-                console.log(res);
+                // console.log(res);
                 this.currentAccount();
             })
             .catch((err) => {
@@ -485,7 +485,7 @@ export class Home extends Component<{}, homeState> {
         if (file) {
             const publicUrl = await this.uploadFile(file, "Videos");
             if (publicUrl) {
-                console.log("Video uploaded successfully:", publicUrl);
+                // console.log("Video uploaded successfully:", publicUrl);
                 this.setState({
                     VideoURL: publicUrl,
                     LinksForModal: {
@@ -506,7 +506,7 @@ export class Home extends Component<{}, homeState> {
         if (file) {
             const publicUrl = await this.uploadFile(file, "Audio");
             if (publicUrl) {
-                console.log("Audio uploaded successfully:", publicUrl);
+                // console.log("Audio uploaded successfully:", publicUrl);
                 this.setState({
                     AudioURL: publicUrl,
                     LinksForModal: {
@@ -527,7 +527,7 @@ export class Home extends Component<{}, homeState> {
         if (file) {
             const publicUrl = await this.uploadFile(file, "DocPdf");
             if (publicUrl) {
-                console.log("Doc / Pdf uploaded successfully:", publicUrl);
+                // console.log("Doc / Pdf uploaded successfully:", publicUrl);
                 this.setState({
                     DocPdfURL: publicUrl,
                     LinksForModal: {
@@ -560,7 +560,7 @@ export class Home extends Component<{}, homeState> {
             await axios
                 .post(`${process.env.REACT_APP_API_URL}/account/updateAccount`, formData)
                 .then((res) => {
-                    console.log(res);
+                    // console.log(res);
                     if (res.status === 200) {
                         this.setState({
                             isEdit: false,
@@ -599,7 +599,7 @@ export class Home extends Component<{}, homeState> {
         await axios
             .post(`${process.env.REACT_APP_API_URL}/account/findAccount`, { currentAccEmail: this.state.formData.email, email: value.username, number: value.room })
             .then((res) => {
-                console.log(res);
+                // console.log(res);
                 // console.log("userData", this.state.userData);
                 const exitsUser = this.state.userData.findIndex((user) => user._id === res.data.user._id);
                 // console.log("roomhandler", exitsUser);
@@ -698,7 +698,7 @@ export class Home extends Component<{}, homeState> {
                             selectedUser: this.state.selectedUser,
                         })
                         .then((res) => {
-                            console.log(res);
+                            // console.log(res);
                         })
                         .catch((err) => {
                             console.log(err);
@@ -727,7 +727,7 @@ export class Home extends Component<{}, homeState> {
         await axios
             .post(`${process.env.REACT_APP_API_URL}/account/newUserList`, { currentAccEmail: this.state.formData.email, userData: user })
             .then((res) => {
-                console.log(res);
+                // console.log(res);
                 if (res.status === 200) {
                     this.currentAccount();
                     toast.success(res.data.message, {
@@ -867,7 +867,7 @@ export class Home extends Component<{}, homeState> {
                                 currentAccEmail: this.state.formData.email,
                                 amount: amount.toString(),
                             });
-                            console.log(response);
+                            // console.log(response);
                         } catch (error) {
                             console.log(error);
                         }

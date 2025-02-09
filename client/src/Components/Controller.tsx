@@ -70,11 +70,11 @@ export class Controller extends Component<{}, ChatStates> {
         await axios
             .get(`${process.env.REACT_APP_API_URL}/account/accountList`)
             .then((res) => {
-                console.log(res);
+                // console.log(res);
                 const userId = localStorage.getItem("userId");
                 const apiAccounts = res.data.accounts;
                 const currentAccount = apiAccounts.find((acc: any) => acc._id === userId);
-                console.log("CurrentAccount", currentAccount);
+                // console.log("CurrentAccount", currentAccount);
                 this.setState({
                     photoLink: currentAccount?.photoName,
                 });
@@ -121,7 +121,7 @@ export class Controller extends Component<{}, ChatStates> {
         }
 
         const publicUrl = publicUrlData.publicUrl;
-        console.log(`${folder} uploaded successfully:`, publicUrl);
+        // console.log(`${folder} uploaded successfully:`, publicUrl);
 
         return publicUrl;
     };
@@ -149,7 +149,7 @@ export class Controller extends Component<{}, ChatStates> {
         await axios
             .post(`${process.env.REACT_APP_API_URL}/account/createAccount`, formData)
             .then((res) => {
-                console.log(res);
+                // console.log(res);
 
                 localStorage.setItem("userId", res.data.data._id);
 
@@ -201,7 +201,7 @@ export class Controller extends Component<{}, ChatStates> {
         await axios
             .post(`${process.env.REACT_APP_API_URL}/account/loginAccount`, loginData)
             .then((res) => {
-                console.log(res);
+                // console.log(res);
                 localStorage.setItem("userId", res.data.currentUser._id);
                 toast.success(res.data.message, {
                     position: "bottom-center",

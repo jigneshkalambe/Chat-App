@@ -27,7 +27,7 @@ export class UserRequest extends Component<props, States> {
         await axios
             .post(`${process.env.REACT_APP_API_URL}/account/isAcceptRequest`, { CurrentAccId: localStorage.getItem("userId"), _id, text: this.state.isAccept })
             .then((res) => {
-                console.log(res);
+                // console.log(res);
 
                 if (res.status === 200) {
                     this.props.currentAccountFn();
@@ -64,7 +64,7 @@ export class UserRequest extends Component<props, States> {
 
     render() {
         const { data } = this.props;
-        console.log(this.state.isAccept);
+        // console.log(this.state.isAccept);
         return (
             <div className="UserRequestBox">
                 <div className="ps-2 col-lg-1 col-md-2 col-sm-3 col-3">
