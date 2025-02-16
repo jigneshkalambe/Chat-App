@@ -169,105 +169,107 @@ export class Profile extends Component<profileProps, profileStates> {
                             </div>
                         </div>
                         <div className="personalInfo">
-                            <Typography variant="body2" component={"p"}>
-                                Personal Information
-                            </Typography>
-                            <div className="d-flex flex-sm-row flex-column gap-4">
-                                <div className="col-lg-6 col-md-6 col-sm-6 col-12">
-                                    <div className="inputFlex">
-                                        <div className="inputBox">
-                                            <label>Email</label>
-                                            {this.props.isEdit === false ? (
-                                                <Typography variant="body1" component={"span"}>
-                                                    {currentData?.email}
-                                                </Typography>
-                                            ) : (
-                                                ""
-                                            )}
-                                            <input
-                                                onChange={this.props.getUpdateData}
-                                                value={this.props.formData.email}
-                                                name="email"
-                                                style={this.props.isEdit === false ? none : display}
-                                                type="email"
-                                                className="form-control"
-                                            ></input>
-                                        </div>
-                                        <div className="inputBox">
-                                            <label>Age</label>
-                                            {this.props.isEdit === false ? (
-                                                <Typography variant="body1" component={"span"}>
-                                                    {currentData?.age}
-                                                </Typography>
-                                            ) : (
-                                                ""
-                                            )}
-                                            <input
-                                                onChange={this.props.getUpdateData}
-                                                value={this.props.formData.age}
-                                                name="age"
-                                                style={this.props.isEdit === false ? none : display}
-                                                type="number"
-                                                className="form-control"
-                                            ></input>
-                                        </div>
-                                        <div className="inputBox">
-                                            <label>Location</label>
-                                            {this.props.isEdit === false ? (
-                                                <Typography variant="body1" component={"span"}>
-                                                    {currentData?.location === "" ? "No location" : currentData?.location}
-                                                </Typography>
-                                            ) : (
-                                                ""
-                                            )}
-                                            <input
-                                                onChange={this.props.getUpdateData}
-                                                value={this.props.formData.location}
-                                                name="location"
-                                                style={this.props.isEdit === false ? none : display}
-                                                type="text"
-                                                className="form-control"
-                                            ></input>
+                            <div>
+                                <Typography variant="body2" component={"p"}>
+                                    Personal Information
+                                </Typography>
+                                <div className="d-flex flex-sm-row flex-column flex-wrap justify-content-between gap-4">
+                                    <div className="col-lg-6 col-md-6 col-sm-6 col-12" style={{ flex: 1 }}>
+                                        <div className="inputFlex">
+                                            <div className="inputBox">
+                                                <label>Email</label>
+                                                {this.props.isEdit === false ? (
+                                                    <Typography variant="body1" component={"span"}>
+                                                        {currentData?.email}
+                                                    </Typography>
+                                                ) : (
+                                                    ""
+                                                )}
+                                                <input
+                                                    onChange={this.props.getUpdateData}
+                                                    value={this.props.formData.email}
+                                                    name="email"
+                                                    style={this.props.isEdit === false ? none : display}
+                                                    type="email"
+                                                    className="form-control"
+                                                ></input>
+                                            </div>
+                                            <div className="inputBox">
+                                                <label>Age</label>
+                                                {this.props.isEdit === false ? (
+                                                    <Typography variant="body1" component={"span"}>
+                                                        {currentData?.age}
+                                                    </Typography>
+                                                ) : (
+                                                    ""
+                                                )}
+                                                <input
+                                                    onChange={this.props.getUpdateData}
+                                                    value={this.props.formData.age}
+                                                    name="age"
+                                                    style={this.props.isEdit === false ? none : display}
+                                                    type="number"
+                                                    className="form-control"
+                                                ></input>
+                                            </div>
+                                            <div className="inputBox">
+                                                <label>Location</label>
+                                                {this.props.isEdit === false ? (
+                                                    <Typography variant="body1" component={"span"}>
+                                                        {currentData?.location === "" ? "No location" : currentData?.location}
+                                                    </Typography>
+                                                ) : (
+                                                    ""
+                                                )}
+                                                <input
+                                                    onChange={this.props.getUpdateData}
+                                                    value={this.props.formData.location}
+                                                    name="location"
+                                                    style={this.props.isEdit === false ? none : display}
+                                                    type="text"
+                                                    className="form-control"
+                                                ></input>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="col-lg-6 col-md-6 col-sm-6 col-12">
-                                    <div className="inputFlex">
-                                        <div className="inputBox">
-                                            <label>Phone Number</label>
-                                            {this.props.isEdit === false ? (
-                                                <Typography variant="body1" component={"span"}>
-                                                    {currentData?.number}
-                                                </Typography>
-                                            ) : (
-                                                ""
-                                            )}
-                                            <input
-                                                onChange={this.props.getUpdateData}
-                                                value={this.props.formData.number}
-                                                name="number"
-                                                style={this.props.isEdit === false ? none : display}
-                                                type="text"
-                                                className="form-control"
-                                            ></input>
-                                        </div>
-                                        <div className="inputBox">
-                                            <label>Gender</label>
-                                            {this.props.isEdit === false ? (
-                                                <Typography variant="body1" component={"span"}>
-                                                    {currentData?.gender}
-                                                </Typography>
-                                            ) : (
-                                                ""
-                                            )}
-                                            <input
-                                                onChange={this.props.getUpdateData}
-                                                value={this.props.formData.gender}
-                                                name="gender"
-                                                style={this.props.isEdit === false ? none : display}
-                                                type="text"
-                                                className="form-control"
-                                            ></input>
+                                    <div className="col-lg-6 col-md-6 col-sm-6 col-12" style={{ flex: 1 }}>
+                                        <div className="inputFlex">
+                                            <div className="inputBox">
+                                                <label>Phone Number</label>
+                                                {this.props.isEdit === false ? (
+                                                    <Typography variant="body1" component={"span"}>
+                                                        {currentData?.number}
+                                                    </Typography>
+                                                ) : (
+                                                    ""
+                                                )}
+                                                <input
+                                                    onChange={this.props.getUpdateData}
+                                                    value={this.props.formData.number}
+                                                    name="number"
+                                                    style={this.props.isEdit === false ? none : display}
+                                                    type="text"
+                                                    className="form-control"
+                                                ></input>
+                                            </div>
+                                            <div className="inputBox">
+                                                <label>Gender</label>
+                                                {this.props.isEdit === false ? (
+                                                    <Typography variant="body1" component={"span"}>
+                                                        {currentData?.gender}
+                                                    </Typography>
+                                                ) : (
+                                                    ""
+                                                )}
+                                                <input
+                                                    onChange={this.props.getUpdateData}
+                                                    value={this.props.formData.gender}
+                                                    name="gender"
+                                                    style={this.props.isEdit === false ? none : display}
+                                                    type="text"
+                                                    className="form-control"
+                                                ></input>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

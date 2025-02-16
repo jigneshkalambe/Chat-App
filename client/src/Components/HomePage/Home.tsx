@@ -6,7 +6,7 @@ import HomeComponent from "../HomeComponents/HomeComponent";
 import Profile from "../Profile/Profile";
 import Chats from "../Chats/Chats";
 import axios from "axios";
-import { Slide, toast, ToastContainer } from "react-toastify";
+import { Slide, toast } from "react-toastify";
 import { io, Socket } from "socket.io-client";
 import { supabase } from "../supabaseClient";
 import { load } from "@cashfreepayments/cashfree-js";
@@ -112,6 +112,7 @@ interface homeState {
     friendRequestList: friendDataKey[];
     friendRequestListCount: number;
     activeUserId: string;
+    isUsersLoading: boolean;
 }
 export class Home extends Component<{}, homeState> {
     private autoScroll: React.RefObject<HTMLDivElement>;
@@ -188,6 +189,7 @@ export class Home extends Component<{}, homeState> {
             friendRequestList: [],
             activeUserId: "",
             friendRequestListCount: 0,
+            isUsersLoading: true,
         };
         this.socket = io("https://chat-app-qu8l.onrender.com/");
         this.autoScroll = React.createRef();
@@ -380,11 +382,16 @@ export class Home extends Component<{}, homeState> {
                             messages: currentAccount?.messages || {},
                             paymentSuccessfully: currentAccount?.paymentSuccessfully,
                             friendRequestList: currentAccount?.friendRequestList,
+                            isUsersLoading: false,
                         },
                         () => {
                             this.checkSubscriptionStatus();
                         }
                     );
+                } else {
+                    this.setState({
+                        isUsersLoading: true,
+                    });
                 }
             })
             .catch((err) => console.log(err));
@@ -959,7 +966,6 @@ export class Home extends Component<{}, homeState> {
 
     render() {
         // console.log("SelectedUser", this.state.messages[this.state.selectedUser._id]);
-
         const { components } = this.state;
         let componentRender: JSX.Element | null = null;
         if (components === "Profile") {
@@ -1008,6 +1014,7 @@ export class Home extends Component<{}, homeState> {
                     activeUserIdFn={this.activeUserIdFn}
                     currentAccountFn={this.currentAccount}
                     socket={this.socket}
+                    usersLoading={this.state.isUsersLoading}
                 />
             );
         } else if (components === "Subscriptions") {

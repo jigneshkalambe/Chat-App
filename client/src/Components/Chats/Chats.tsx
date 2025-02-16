@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./Chats.css";
-import { Avatar, Backdrop, Box, Button, Dialog, DialogTitle, Divider, Menu, MenuItem, Modal, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import { Avatar, Backdrop, Box, Button, Dialog, DialogTitle, Divider, Menu, MenuItem, Modal, Paper, Skeleton, Stack, Tooltip, Typography } from "@mui/material";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import PersonAddOutlinedIcon from "@mui/icons-material/PersonAddOutlined";
 import Users from "../Users/Users";
@@ -96,6 +96,7 @@ interface chatStates {
     dialogBoxTypes: "delete" | "edit";
     selectedMsg: data;
     editMsg: string;
+    typingUserId: string | null | number;
 }
 
 interface chatProps {
@@ -127,6 +128,7 @@ interface chatProps {
     formData: formDataTypes;
     currentAccountFn: () => void;
     socket: Socket;
+    usersLoading: boolean;
 }
 
 interface FadeProps {
@@ -196,11 +198,24 @@ export class Chats extends Component<chatProps, chatStates> {
                 docpdf: "",
             },
             editMsg: "",
+            typingUserId: null,
         };
     }
 
     componentDidMount(): void {
         window.addEventListener("resize", this.handleResize);
+
+        this.props.socket.on("userTyping", ({ senderId }) => {
+            if (senderId === this.props.selectedUser._id) {
+                this.setState({ isTyping: true });
+            }
+        });
+
+        this.props.socket.on("userStoppedTyping", ({ senderId }) => {
+            if (senderId === this.props.selectedUser._id) {
+                this.setState({ isTyping: false });
+            }
+        });
     }
 
     componentDidUpdate(prevProps: Readonly<chatProps>, prevState: Readonly<chatStates>, snapshot?: any): void {
@@ -448,27 +463,41 @@ export class Chats extends Component<chatProps, chatStates> {
                             ></input>
                         </div>
                         <div className="chat_users">
-                            {renderMap.map((val: any, ind: any) => {
-                                return (
-                                    <div
-                                        key={ind}
-                                        className={this.props.activeUserId === val._id ? "active-user" : ""}
-                                        onClick={() => {
-                                            this.props.activeUserIdFn(val._id);
-                                            this.pendingChatHandler(val);
-                                        }}
-                                    >
-                                        <Users
-                                            selectUserHandler={this.props.selectUserHandler}
-                                            deleteNewUserList={this.props.deleteNewUserList}
-                                            user={val}
-                                            activeUserId={this.props.activeUserId}
-                                            onlineState={this.props.onlineState}
-                                        />
-                                        <Divider />
-                                    </div>
-                                );
-                            })}
+                            {this.props.usersLoading
+                                ? // <Skeleton animation="wave" />
+                                  Array.from({ length: renderMap?.length || 5 }).map((_, ind) => {
+                                      return (
+                                          <div key={ind} style={{ display: "flex", width: "100%", alignItems: "center", gap: "10px", padding: "20px", height: "93px" }}>
+                                              <Skeleton variant="circular" width={50} height={50} animation="wave" />
+                                              <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+                                                  <Skeleton variant="text" width="100%" height={30} animation="wave" />
+                                                  <Skeleton variant="text" width="60%" height={20} animation="wave" />
+                                              </div>
+                                          </div>
+                                      );
+                                  })
+                                : renderMap.map((val: any, ind: any) => {
+                                      return (
+                                          <div
+                                              key={ind}
+                                              className={this.props.activeUserId === val._id ? "active-user" : ""}
+                                              onClick={() => {
+                                                  this.props.activeUserIdFn(val._id);
+                                                  this.pendingChatHandler(val);
+                                              }}
+                                          >
+                                              <Users
+                                                  selectUserHandler={this.props.selectUserHandler}
+                                                  deleteNewUserList={this.props.deleteNewUserList}
+                                                  user={val}
+                                                  activeUserId={this.props.activeUserId}
+                                                  onlineState={this.props.onlineState}
+                                                  socket={this.props.socket}
+                                              />
+                                              <Divider />
+                                          </div>
+                                      );
+                                  })}
                         </div>
                         <div className="chat_Add">
                             <Button
@@ -552,14 +581,7 @@ export class Chats extends Component<chatProps, chatStates> {
                                                 {this.props.selectedUser.firstName + " " + this.props.selectedUser.lastName}
                                             </Typography>
                                             <Typography sx={{ fontSize: "13px" }}>
-                                                {this.props.onlineState.some((id) => (id as unknown) === this.props.selectedUser._id) ? "Online" : "Offline"}
-                                                {/* {this.props.messages[this.props.selectedUser._id]?.find((msg) => msg.Author === this.props.selectedUser._id)
-                                                    ? this.props.onlineState.some((id) => (id as unknown) === this.props.selectedUser._id)
-                                                        ? "Online"
-                                                        : this.state.isTyping === true
-                                                        ? "Typing..."
-                                                        : "Offline"
-                                                    : "Offline"} */}
+                                                {this.props.onlineState.some((id) => id.toString() === this.props.selectedUser._id) ? (this.state.isTyping ? "Typing..." : "Online") : "Offline"}
                                             </Typography>
                                         </Stack>
                                     </div>
@@ -917,18 +939,34 @@ export class Chats extends Component<chatProps, chatStates> {
                                         value={this.state.msg}
                                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                             this.setState({ msg: e.target.value });
-                                        }}
-                                        onKeyDown={(e: React.KeyboardEvent) => {
-                                            this.setState({
-                                                isTyping: true,
+
+                                            this.props.socket.emit("typing", {
+                                                senderId: localStorage.getItem("userId"),
+                                                recipientId: this.props.selectedUser._id,
                                             });
 
+                                            // Clear the previous timeout
                                             if (this.typingTimeout) clearTimeout(this.typingTimeout);
 
+                                            // Set a timeout to emit stopTyping after 1s of inactivity
                                             this.typingTimeout = setTimeout(() => {
-                                                this.setState({ isTyping: false });
+                                                this.props.socket.emit("stopTyping", {
+                                                    senderId: localStorage.getItem("userId"),
+                                                    recipientId: this.props.selectedUser._id,
+                                                });
                                             }, 1000);
                                         }}
+                                        // onKeyDown={(e: React.KeyboardEvent) => {
+                                        //     this.setState({
+                                        //         isTyping: true,
+                                        //     });
+
+                                        //     if (this.typingTimeout) clearTimeout(this.typingTimeout);
+
+                                        //     this.typingTimeout = setTimeout(() => {
+                                        //         this.setState({ isTyping: false });
+                                        //     }, 1000);
+                                        // }}
                                         placeholder="Send Massages"
                                         type="text"
                                     ></input>
@@ -994,7 +1032,12 @@ export class Chats extends Component<chatProps, chatStates> {
                                     >
                                         <AttachFileIcon />
                                     </Button>
-                                    <Button type="submit" variant="contained" sx={{ borderRadius: "20px", width: "45px", height: "45px", minWidth: "45px", backgroundColor: "#2196F3" }}>
+                                    <Button
+                                        disabled={this.state.msg === ""}
+                                        type="submit"
+                                        variant="contained"
+                                        sx={{ borderRadius: "20px", width: "45px", height: "45px", minWidth: "45px", backgroundColor: "#2196F3" }}
+                                    >
                                         <SendOutlinedIcon />
                                     </Button>
                                 </div>

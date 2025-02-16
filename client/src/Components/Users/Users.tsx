@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import "./Users.css";
-import { Avatar, Badge, Box, Button, IconButton, styled, Typography } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { DeleteOutlineOutlined, MailOutline } from "@mui/icons-material";
+import { Avatar, Badge, Box, Button, styled, Typography } from "@mui/material";
+import { DeleteOutlineOutlined } from "@mui/icons-material";
+import { Socket } from "socket.io-client";
 
 interface UserData {
     _id: string;
@@ -29,9 +29,38 @@ interface UsersProps {
     activeUserId: string;
     deleteNewUserList: (user: UserData) => void;
     selectUserHandler: (user: UserData) => void;
+    socket: Socket;
 }
 
-export class Users extends Component<UsersProps> {
+interface UsersState {
+    isTyping: boolean;
+}
+
+export class Users extends Component<UsersProps, UsersState> {
+    constructor(props: UsersProps) {
+        super(props);
+        this.state = { isTyping: false };
+    }
+
+    componentDidMount() {
+        this.props.socket.on("userTyping", ({ senderId }) => {
+            if (senderId === this.props.user._id) {
+                this.setState({ isTyping: true });
+            }
+        });
+
+        this.props.socket.on("userStoppedTyping", ({ senderId }) => {
+            if (senderId === this.props.user._id) {
+                this.setState({ isTyping: false });
+            }
+        });
+    }
+
+    componentWillUnmount() {
+        this.props.socket.off("userTyping");
+        this.props.socket.off("userStoppedTyping");
+    }
+
     deleteHandler = () => {
         this.props.deleteNewUserList(this.props.user);
     };
@@ -94,7 +123,7 @@ export class Users extends Component<UsersProps> {
                             {`${this.props.user.firstName} ${this.props.user.lastName}`}
                         </Typography>
                         <Typography variant="subtitle2" component="span" className={`user-status ${isOnline ? "online" : "offline"}`}>
-                            {isOnline ? "Online" : "Offline"}
+                            {isOnline ? (this.state.isTyping ? "Typing..." : "Online") : "Offline"}
                         </Typography>
                     </div>
                 </div>
